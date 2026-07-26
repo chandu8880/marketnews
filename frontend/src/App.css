@@ -66,6 +66,19 @@
   transform: scale(0.92);
 }
 
+.refresh-btn-spinning {
+  animation: refresh-spin 0.7s linear;
+}
+
+@keyframes refresh-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* ---------- Side menu drawer ---------- */
 .side-menu-backdrop {
   position: fixed;

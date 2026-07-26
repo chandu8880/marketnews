@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { analyzeResult, fetchResults } from "../api";
 import { timeAgo } from "../utils/time";
 import FilterTabs from "../components/FilterTabs";
+import { useRefreshSignal } from "../hooks/useRefreshSignal";
 
 const SENTIMENT_META = {
   bullish: { label: "Bullish", cls: "badge-bullish", icon: "▲" },
@@ -125,19 +126,27 @@ function ResultCard({ r }) {
   );
 }
 
-export default function ResultsView() {
+export default function ResultsView({ refreshSignal }) {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [query, setQuery] = useState("");
   const [sentimentFilter, setSentimentFilter] = useState("all");
 
-  useEffect(() => {
-    fetchResults({ days: 4 })
+  const load = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    return fetchResults({ days: 4 })
       .then((data) => setResults(data.results))
       .catch((e) => setError(e.message || "Failed to load results"))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  useRefreshSignal(refreshSignal, load);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();

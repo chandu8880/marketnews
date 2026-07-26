@@ -3,6 +3,7 @@ import NewsCard from "../components/NewsCard";
 import SearchBar from "../components/SearchBar";
 import StockSentimentBar from "../components/StockSentimentBar";
 import { fetchNews } from "../api";
+import { useRefreshSignal } from "../hooks/useRefreshSignal";
 import { useSearch } from "../hooks/useSearch";
 import { useTrackedStocks } from "../hooks/useTrackedStocks";
 
@@ -72,10 +73,11 @@ function StockDetail({ stock, onBack }) {
   );
 }
 
-export default function StocksView() {
-  const { stocks, loading, error } = useTrackedStocks();
+export default function StocksView({ refreshSignal }) {
+  const { stocks, loading, error, reload } = useTrackedStocks();
   const [selected, setSelected] = useState(null);
   const search = useSearch();
+  useRefreshSignal(refreshSignal, reload);
 
   const matches = useMemo(() => {
     if (!search.active) return stocks;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { fetchStocks } from "../api";
 
 // The ~65 NSE companies/indices tickers.py tags in news, used to power
@@ -9,12 +9,18 @@ export function useTrackedStocks() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchStocks()
+  const reload = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    return fetchStocks()
       .then((data) => setStocks(data.stocks))
       .catch((e) => setError(e.message || "Failed to load stocks"))
       .finally(() => setLoading(false));
   }, []);
 
-  return { stocks, loading, error };
+  useEffect(() => {
+    reload();
+  }, [reload]);
+
+  return { stocks, loading, error, reload };
 }

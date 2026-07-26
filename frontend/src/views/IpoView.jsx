@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { fetchIpos } from "../api";
+import { useRefreshSignal } from "../hooks/useRefreshSignal";
 
 const STATUS_CLASS = {
   Upcoming: "ipo-status-upcoming",
@@ -19,18 +20,26 @@ function tabKeyFor(status) {
   return status === "Open" || status === "Closed" ? status : "Upcoming";
 }
 
-export default function IpoView() {
+export default function IpoView({ refreshSignal }) {
   const [ipos, setIpos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("Open");
 
-  useEffect(() => {
-    fetchIpos()
+  const load = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    return fetchIpos()
       .then((data) => setIpos(data.ipos))
       .catch((e) => setError(e.message || "Failed to load IPO data"))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  useRefreshSignal(refreshSignal, load);
 
   const counts = useMemo(() => {
     const c = { Open: 0, Upcoming: 0, Closed: 0 };

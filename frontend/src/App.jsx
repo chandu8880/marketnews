@@ -8,6 +8,7 @@ import SelectionToolbar from "./components/SelectionToolbar";
 import SideMenu from "./components/SideMenu";
 import { useAuth } from "./hooks/useAuth";
 import { useNewsFeed } from "./hooks/useNewsFeed";
+import { useRefreshSignal } from "./hooks/useRefreshSignal";
 import { useSearch } from "./hooks/useSearch";
 import { useTextSelection } from "./hooks/useTextSelection";
 import { useTrackedStocks } from "./hooks/useTrackedStocks";
@@ -26,11 +27,12 @@ const VIEW_TITLES = {
   ipo: "IPO Watch",
 };
 
-function NewsView() {
+function NewsView({ refreshSignal }) {
   const [filter, setFilter] = useState("all");
-  const { articles, loading, error, pendingCount, showPending } = useNewsFeed(filter);
+  const { articles, loading, error, pendingCount, showPending, reload } = useNewsFeed(filter);
   const search = useSearch();
   const { stocks } = useTrackedStocks();
+  useRefreshSignal(refreshSignal, reload);
 
   const showingSearch = search.active;
   const list = showingSearch ? search.results : articles;
@@ -81,6 +83,8 @@ function NewsView() {
 function App() {
   const [view, setView] = useState("overview");
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [refreshSignal, setRefreshSignal] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
   const contentRef = useRef(null);
   const { selection, clear } = useTextSelection(contentRef);
   const auth = useAuth();
@@ -88,6 +92,12 @@ function App() {
   function handleSelectView(key) {
     setView(key);
     setDrawerOpen(false);
+  }
+
+  function handleRefresh() {
+    setRefreshSignal((s) => s + 1);
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 700);
   }
 
   function handleLogout() {
@@ -111,7 +121,13 @@ function App() {
           ☰
         </button>
         <div className="app-header-title">{VIEW_TITLES[view]}</div>
-        <span className="header-spacer" />
+        <button
+          className={`refresh-btn ${refreshing ? "refresh-btn-spinning" : ""}`}
+          onClick={handleRefresh}
+          aria-label="Refresh"
+        >
+          ⟳
+        </button>
       </header>
 
       <SideMenu
@@ -124,12 +140,12 @@ function App() {
       />
 
       <main ref={contentRef} className="app-content">
-        {view === "overview" && <OverviewView />}
-        {view === "news" && <NewsView />}
-        {view === "stocks" && <StocksView />}
-        {view === "results" && <ResultsView />}
-        {view === "dividends" && <DividendsView />}
-        {view === "ipo" && <IpoView />}
+        {view === "overview" && <OverviewView refreshSignal={refreshSignal} />}
+        {view === "news" && <NewsView refreshSignal={refreshSignal} />}
+        {view === "stocks" && <StocksView refreshSignal={refreshSignal} />}
+        {view === "results" && <ResultsView refreshSignal={refreshSignal} />}
+        {view === "dividends" && <DividendsView refreshSignal={refreshSignal} />}
+        {view === "ipo" && <IpoView refreshSignal={refreshSignal} />}
       </main>
 
       <SelectionToolbar selection={selection} onClear={clear} />

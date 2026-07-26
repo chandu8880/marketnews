@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { timeAgo } from "../utils/time";
 import { useNewsFeed } from "../hooks/useNewsFeed";
+import { useRefreshSignal } from "../hooks/useRefreshSignal";
 
 const WINDOW_MS = 24 * 60 * 60 * 1000; // "today's" news
 const CONFIDENCE_THRESHOLD = 0.35; // min |avg sentiment| across a stock's recent news to call it a signal
@@ -47,8 +48,9 @@ function buildCalls(articles) {
   return calls;
 }
 
-export default function OverviewView() {
-  const { articles, loading, error, pendingCount, showPending } = useNewsFeed("all");
+export default function OverviewView({ refreshSignal }) {
+  const { articles, loading, error, pendingCount, showPending, reload } = useNewsFeed("all");
+  useRefreshSignal(refreshSignal, reload);
 
   const calls = useMemo(() => buildCalls(articles), [articles]);
 

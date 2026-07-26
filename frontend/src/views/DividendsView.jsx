@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { fetchDividends } from "../api";
+import { useRefreshSignal } from "../hooks/useRefreshSignal";
 
 function daysAwayLabel(days) {
   if (days === 0) return "Today";
@@ -7,17 +8,25 @@ function daysAwayLabel(days) {
   return `In ${days} days`;
 }
 
-export default function DividendsView() {
+export default function DividendsView({ refreshSignal }) {
   const [dividends, setDividends] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchDividends(4)
+  const load = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    return fetchDividends(4)
       .then((data) => setDividends(data.dividends))
       .catch((e) => setError(e.message || "Failed to load dividends"))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  useRefreshSignal(refreshSignal, load);
 
   return (
     <div className="news-feed">

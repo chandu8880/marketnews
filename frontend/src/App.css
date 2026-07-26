@@ -1,0 +1,1230 @@
+.app-shell {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100svh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+@media (min-width: 481px) {
+  .app-shell {
+    border-inline: 1px solid var(--border);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.06);
+  }
+}
+
+/* ---------- Header ---------- */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(12px + var(--safe-top)) 16px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.app-header-title {
+  flex: 1;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+.app-logo {
+  font-size: 20px;
+}
+
+.header-spacer {
+  width: 36px;
+  height: 36px;
+}
+
+.menu-toggle-btn,
+.refresh-btn {
+  border: none;
+  background: var(--neutral-bg);
+  color: var(--text);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.menu-toggle-btn:active,
+.refresh-btn:active {
+  transform: scale(0.92);
+}
+
+/* ---------- Side menu drawer ---------- */
+.side-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 39;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.side-menu-backdrop-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: min(78vw, 300px);
+  background: var(--surface);
+  z-index: 40;
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+  padding-top: var(--safe-top);
+}
+
+.side-menu-open {
+  transform: translateX(0);
+}
+
+.side-menu-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.side-menu-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.side-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  padding: 12px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.side-menu-item-active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.side-menu-icon {
+  font-size: 18px;
+}
+
+.side-menu-footer {
+  margin-top: auto;
+  padding: 8px;
+  border-top: 1px solid var(--border);
+  padding-bottom: calc(8px + var(--safe-bottom));
+}
+
+.side-menu-phone {
+  font-size: 11.5px;
+  color: var(--text-faint);
+  padding: 6px 14px 8px;
+}
+
+.side-menu-logout {
+  color: var(--bearish);
+}
+
+/* ---------- Login screen ---------- */
+.login-shell {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg);
+}
+
+.login-checking {
+  min-height: 100svh;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 28px 22px;
+}
+
+.login-logo {
+  font-size: 34px;
+  text-align: center;
+}
+
+.login-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.login-subtitle {
+  margin: -8px 0 4px;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.login-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.login-timer {
+  color: var(--bullish);
+  font-weight: 700;
+}
+
+.login-timer-expired {
+  color: var(--bearish);
+  font-weight: 700;
+}
+
+.login-input {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  padding: 11px 12px;
+  border-radius: 10px;
+  outline: none;
+  letter-spacing: 0.5px;
+}
+
+.login-input:disabled {
+  opacity: 0.7;
+}
+
+.login-btn {
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.login-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.login-otp-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.login-dev-otp {
+  background: var(--neutral-bg);
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.login-dev-otp-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--text-faint);
+  text-transform: uppercase;
+}
+
+.login-dev-otp-code {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  margin-top: 4px;
+}
+
+.login-resend-btn {
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.login-error {
+  font-size: 12.5px;
+  color: var(--bearish);
+  text-align: center;
+}
+
+/* ---------- Sticky toolbar (search bar + filter tabs) ---------- */
+.sticky-toolbar {
+  position: sticky;
+  top: calc(60px + var(--safe-top));
+  z-index: 19;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+/* ---------- Search bar ---------- */
+.search-bar-wrap {
+  position: relative;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 16px;
+  padding: 9px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.search-icon {
+  font-size: 14px;
+  opacity: 0.6;
+}
+
+.search-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+  min-width: 0;
+}
+
+.search-go-btn,
+.search-clear-btn {
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.search-clear-btn {
+  background: var(--neutral-bg);
+  color: var(--text-muted);
+}
+
+.search-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 16px;
+  right: 16px;
+  margin: -4px 0 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 21;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.search-suggestion-item {
+  width: 100%;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 13.5px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.search-suggestion-item:active {
+  background: var(--neutral-bg);
+}
+
+.search-suggestion-ticker {
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+
+.search-suggestion-name {
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Generic view helpers ---------- */
+.app-content {
+  flex: 1;
+}
+
+.view-intro {
+  padding: 0 16px 8px;
+  font-size: 12.5px;
+  color: var(--text-faint);
+  line-height: 1.5;
+}
+
+.back-btn {
+  align-self: flex-start;
+  border: none;
+  background: var(--neutral-bg);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+/* ---------- Filter tabs ---------- */
+.filter-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 10px;
+  background: var(--bg);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.filter-tab {
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.filter-tab-active {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+.filter-tab-active.filter-tab-bullish {
+  background: var(--bullish);
+  border-color: var(--bullish);
+  color: #fff;
+}
+
+.filter-tab-active.filter-tab-bearish {
+  background: var(--bearish);
+  border-color: var(--bearish);
+  color: #fff;
+}
+
+/* ---------- New articles banner ---------- */
+.new-articles-banner {
+  margin: 8px auto 0;
+  display: block;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+}
+
+/* ---------- Feed ---------- */
+.news-feed {
+  flex: 1;
+  padding: 12px 16px calc(32px + var(--safe-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.status-msg {
+  text-align: center;
+  color: var(--text-faint);
+  padding: 40px 12px;
+  font-size: 14px;
+}
+
+.status-error {
+  color: var(--bearish);
+}
+
+.feed-end {
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 12px;
+  padding: 12px 0 4px;
+}
+
+/* ---------- News card ---------- */
+.news-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.news-card-top {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.news-source {
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.news-dot {
+  opacity: 0.6;
+}
+
+.news-time {
+  flex: 1;
+}
+
+.sentiment-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  letter-spacing: 0.2px;
+}
+
+.badge-bullish {
+  color: var(--bullish);
+  background: var(--bullish-bg);
+}
+
+.badge-bearish {
+  color: var(--bearish);
+  background: var(--bearish-bg);
+}
+
+.badge-neutral {
+  color: var(--neutral);
+  background: var(--neutral-bg);
+}
+
+.news-title {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.35;
+  font-weight: 700;
+  letter-spacing: -0.1px;
+}
+
+.news-title a {
+  text-decoration: none;
+}
+
+.news-title a:active {
+  opacity: 0.7;
+}
+
+.news-summary {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.stock-chip-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-top: 2px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.stock-chip {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 12px;
+  border: 1px solid transparent;
+}
+
+.stock-chip-name {
+  color: inherit;
+  opacity: 0.85;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stock-chip-bullish {
+  background: var(--bullish-bg);
+  color: var(--bullish);
+}
+
+.stock-chip-bearish {
+  background: var(--bearish-bg);
+  color: var(--bearish);
+}
+
+.stock-chip-neutral {
+  background: var(--neutral-bg);
+  color: var(--neutral);
+}
+
+/* ---------- Selection toolbar (copy / translate) ---------- */
+.selection-toolbar {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  z-index: 50;
+  max-width: min(88vw, 360px);
+}
+
+.selection-toolbar-buttons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #1f2330;
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.sel-btn {
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sel-btn:active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.sel-btn-primary {
+  color: #7dd3fc;
+}
+
+.sel-btn-close {
+  font-size: 16px;
+  padding: 6px 9px;
+  color: #9ca3af;
+}
+
+.selection-translation {
+  background: #1f2330;
+  color: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.selection-translation-original {
+  font-size: 12px;
+  color: #9ca3af;
+  border-left: 2px solid #3b3f4c;
+  padding-left: 8px;
+}
+
+.selection-translation-telugu {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.selection-translation-error {
+  font-size: 13px;
+  color: #f87171;
+}
+
+.selection-translation .selection-toolbar-buttons {
+  background: transparent;
+  padding: 0;
+  justify-content: flex-end;
+}
+
+/* ---------- Stocks view ---------- */
+.stock-row-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  width: 100%;
+}
+
+.stock-row-card:active {
+  opacity: 0.85;
+}
+
+.stock-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.stock-row-ticker {
+  font-size: 15px;
+  font-weight: 800;
+  margin-right: 8px;
+}
+
+.stock-row-name {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.stock-row-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.call-card {
+  text-decoration: none;
+  border-left: 3px solid var(--border);
+}
+
+.call-card-bullish {
+  border-left-color: var(--bullish);
+}
+
+.call-card-bearish {
+  border-left-color: var(--bearish);
+}
+
+.call-card-headline {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.stock-sentiment-bar {
+  display: flex;
+  height: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--neutral-bg);
+}
+
+.ssb-bullish {
+  background: var(--bullish);
+}
+
+.ssb-bearish {
+  background: var(--bearish);
+}
+
+.ssb-neutral {
+  background: var(--text-faint);
+  opacity: 0.5;
+}
+
+.stock-detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.stock-detail-ticker {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.stock-detail-name {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.stock-detail-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.count-bullish {
+  color: var(--bullish);
+  font-weight: 600;
+}
+
+.count-bearish {
+  color: var(--bearish);
+  font-weight: 600;
+}
+
+.count-neutral {
+  color: var(--neutral);
+  font-weight: 600;
+}
+
+/* ---------- Dividends view ---------- */
+.dividend-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dividend-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.dividend-symbol {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.dividend-company {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.dividend-days-chip {
+  flex: 0 0 auto;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.dividend-card-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.dividend-type {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.dividend-amount {
+  color: var(--bullish);
+  font-weight: 700;
+}
+
+/* ---------- IPO view ---------- */
+.ipo-tab-bar {
+  display: flex;
+  gap: 6px;
+  background: var(--neutral-bg);
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.ipo-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 6px;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.ipo-tab-active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.ipo-tab-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-faint);
+  background: var(--neutral-bg);
+  border-radius: 999px;
+  padding: 1px 6px;
+}
+
+.ipo-tab-active .ipo-tab-count {
+  color: var(--accent);
+}
+
+.ipo-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ipo-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ipo-company {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.ipo-badges {
+  display: flex;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.ipo-type-chip {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--neutral-bg);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.ipo-status-chip {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.ipo-status-upcoming {
+  background: var(--neutral-bg);
+  color: var(--neutral);
+}
+
+.ipo-status-open {
+  background: var(--bullish-bg);
+  color: var(--bullish);
+}
+
+.ipo-status-closed {
+  background: var(--bearish-bg);
+  color: var(--bearish);
+}
+
+.ipo-gmp-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.ipo-gmp-label {
+  font-weight: 700;
+  color: var(--text-faint);
+}
+
+.ipo-gmp-value {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.ipo-subscription-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  background: var(--neutral-bg);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.ipo-subscription-grid > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.ipo-sub-label {
+  font-size: 10.5px;
+  color: var(--text-faint);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.ipo-sub-value {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.ipo-sub-total {
+  color: var(--accent);
+}
+
+.ipo-card-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+/* ---------- Results view ---------- */
+.result-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.result-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.result-company {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.result-time {
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.result-headline {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.result-headline a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ---------- Related news / analysis block (Results view) ---------- */
+.related-news-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--neutral-bg);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+.related-news-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  letter-spacing: 0.3px;
+}
+
+.related-news-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--text);
+  text-decoration: none;
+  padding: 3px 0;
+}
+
+.related-news-source {
+  font-size: 10.5px;
+  color: var(--text-faint);
+}
+
+.analyze-btn {
+  align-self: flex-start;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 7px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.analyze-btn:disabled {
+  opacity: 0.6;
+}
+
+.analyze-error {
+  font-size: 12px;
+  color: var(--bearish);
+}
+
+.analysis-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.analysis-pct {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.analysis-pct-up {
+  color: var(--bullish);
+}
+
+.analysis-pct-down {
+  color: var(--bearish);
+}
+
+.analysis-estimate {
+  font-size: 12.5px;
+  font-weight: 700;
+  width: fit-content;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.estimate-beat {
+  color: var(--bullish);
+  background: var(--bullish-bg);
+}
+
+.estimate-miss {
+  color: var(--bearish);
+  background: var(--bearish-bg);
+}
+
+.estimate-inline {
+  color: var(--neutral);
+  background: var(--neutral-bg);
+}
+
+.analysis-empty {
+  font-size: 12px;
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+.analysis-disclaimer {
+  font-size: 10.5px;
+  color: var(--text-faint);
+}

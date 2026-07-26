@@ -1,4 +1,5 @@
 import logging
+import os
 from contextlib import asynccontextmanager
 from datetime import date, datetime, timedelta
 
@@ -37,6 +38,20 @@ logger = logging.getLogger("main")
 
 COOKIE_NAME = "session_token"
 
+# The frontend now runs on a different domain than the backend (Vercel),
+# so the session cookie is genuinely cross-site. Vercel sets VERCEL=1 on
+# every deployed function, so this switches automatically: SameSite=None
+# + Secure in production (required for a cross-site cookie to be sent at
+# all), SameSite=Lax + not-Secure for plain-http local dev (Secure cookies
+# are silently rejected by browsers over http://localhost).
+IS_DEPLOYED = bool(os.environ.get("VERCEL"))
+
+ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get("ALLOWED_ORIGINS", "http://localhost:5173").split(",")
+    if origin.strip()
+]
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -49,7 +64,7 @@ app = FastAPI(title="Market News API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -64,8 +79,8 @@ def _set_session_cookie(response: Response, token: str):
         key=COOKIE_NAME,
         value=token,
         httponly=True,
-        samesite="lax",
-        secure=False,  # local http dev only; set True behind HTTPS in production
+        samesite="none" if IS_DEPLOYED else "lax",
+        secure=IS_DEPLOYED,
         path="/",
     )
 
@@ -113,7 +128,12 @@ def auth_logout_endpoint(request: Request, response: Response):
     token = request.cookies.get(COOKIE_NAME)
     if token:
         auth_logout(token)
-    response.delete_cookie(COOKIE_NAME, path="/")
+    response.delete_cookie(
+        COOKIE_NAME,
+        path="/",
+        samesite="none" if IS_DEPLOYED else "lax",
+        secure=IS_DEPLOYED,
+    )
     return {"ok": True}
 
 

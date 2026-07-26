@@ -9,10 +9,14 @@ export function useTrackedStocks() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Fetches the backend's max (200), not just the 50 shown by default in the
+  // "All" tab - the Bullish/Bearish tabs filter this same broader set down
+  // to "every currently-bullish/bearish stock", not just whichever of them
+  // happened to make the top 50 by mentions.
   const reload = useCallback((force = false) => {
     setLoading(true);
     setError(null);
-    return fetchStocks(50, force)
+    return fetchStocks(200, force)
       .then((data) => setStocks(data.stocks))
       .catch((e) => setError(e.message || "Failed to load stocks"))
       .finally(() => setLoading(false));

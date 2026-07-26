@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import FilterTabs from "../components/FilterTabs";
 import NewsCard from "../components/NewsCard";
 import SearchBar from "../components/SearchBar";
 import StockSentimentBar from "../components/StockSentimentBar";
@@ -13,6 +14,26 @@ const SENTIMENT_META = {
   bearish: { label: "Bearish", cls: "badge-bearish", icon: "▼" },
   neutral: { label: "Neutral", cls: "badge-neutral", icon: "●" },
 };
+
+const DEFAULT_TOP_N = 50;
+
+// "All" keeps the existing top-50-by-activity ranking; Bullish/Bearish show
+// every matching stock (not capped to 50) ordered by confidence - i.e. how
+// strongly one-sided its recent coverage has been, not just mention count.
+function applyTab(stocks, tab) {
+  if (tab === "all") return stocks.slice(0, DEFAULT_TOP_N);
+  if (tab === "bullish") {
+    return stocks
+      .filter((s) => s.overall_sentiment === "bullish")
+      .sort((a, b) => b.net_score - a.net_score);
+  }
+  if (tab === "bearish") {
+    return stocks
+      .filter((s) => s.overall_sentiment === "bearish")
+      .sort((a, b) => a.net_score - b.net_score);
+  }
+  return stocks.filter((s) => s.overall_sentiment === "neutral");
+}
 
 function StockDetail({ stock, onBack }) {
   const [articles, setArticles] = useState([]);
@@ -78,11 +99,12 @@ export default function StocksView({ refreshSignal }) {
   const { stocks, loading, error, reload } = useTrackedStocks();
   const universe = useStockUniverse();
   const [selected, setSelected] = useState(null);
+  const [sentimentTab, setSentimentTab] = useState("all");
   const search = useSearch();
   useRefreshSignal(refreshSignal, reload);
 
   // Autocomplete suggestions cover every listed Indian stock, not just the
-  // ~50 currently trending in news - tracked ones (which carry live
+  // ones currently trending in news - tracked ones (which carry live
   // sentiment) take priority over the bare universe entry for the same symbol.
   const suggestions = useMemo(() => {
     const bySymbol = new Map();
@@ -91,13 +113,15 @@ export default function StocksView({ refreshSignal }) {
     return Array.from(bySymbol.values());
   }, [universe, stocks]);
 
+  const tabbed = useMemo(() => applyTab(stocks, sentimentTab), [stocks, sentimentTab]);
+
   const matches = useMemo(() => {
-    if (!search.active) return stocks;
+    if (!search.active) return tabbed;
     const q = search.query.trim().toLowerCase();
     return stocks.filter(
       (s) => s.ticker.toLowerCase().includes(q) || s.name.toLowerCase().includes(q)
     );
-  }, [stocks, search.active, search.query]);
+  }, [stocks, tabbed, search.active, search.query]);
 
   if (selected) {
     return <StockDetail stock={selected} onBack={() => setSelected(null)} />;
@@ -117,14 +141,28 @@ export default function StocksView({ refreshSignal }) {
           active={search.active}
           suggestions={suggestions}
         />
+        {!search.active && <FilterTabs active={sentimentTab} onChange={setSentimentTab} />}
       </div>
 
       <div className="news-feed">
-        {!search.active && (
+        {!search.active && sentimentTab === "all" && (
           <div className="view-intro">
             Top 50 stocks by news activity today. Search covers every listed Indian stock, not
             just these — pick any company and it'll pull live news even if it isn't trending yet.
           </div>
+        )}
+        {!search.active && sentimentTab === "bullish" && (
+          <div className="view-intro">
+            Every currently-bullish stock, most confident first.
+          </div>
+        )}
+        {!search.active && sentimentTab === "bearish" && (
+          <div className="view-intro">
+            Every currently-bearish stock, most confident first.
+          </div>
+        )}
+        {!search.active && sentimentTab === "neutral" && (
+          <div className="view-intro">Stocks with mixed or inconclusive recent coverage.</div>
         )}
         {search.active && !showNewsFallback && (
           <div className="view-intro">
@@ -141,6 +179,9 @@ export default function StocksView({ refreshSignal }) {
         {error && !loading && <div className="status-msg status-error">{error}</div>}
         {!loading && !error && !search.active && stocks.length === 0 && (
           <div className="status-msg">No stock mentions found yet.</div>
+        )}
+        {!loading && !error && !search.active && stocks.length > 0 && matches.length === 0 && (
+          <div className="status-msg">No {sentimentTab} stocks right now.</div>
         )}
 
         {showNewsFallback && (

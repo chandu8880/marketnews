@@ -40,17 +40,28 @@ def search_news(query: str, limit: int = 60):
         extra_terms.append(COMPANY_MAP[query_upper][0].lower())
 
     raw = _live_search_fetch(query)
+    live_articles = []
     if raw:
-        processed = process_raw_articles(raw)
-        store.upsert_many(processed)
+        live_articles = process_raw_articles(raw)
+        store.upsert_many(live_articles)
 
-    articles = store.all_sorted()
-    matches = []
-    for article in articles:
+    # The live fetch above is already scoped to this exact query (Google News
+    # relevance-matched it), so those results are trusted as-is - re-checking
+    # them against our own narrow ticker list/substring match would silently
+    # drop real hits just because Google matched on relevance rather than an
+    # exact substring (e.g. a smaller company not in our curated ticker map).
+    # The store-wide scan below is purely a *supplement*, surfacing other
+    # previously-cached articles about the same query that the live fetch
+    # didn't happen to return this time.
+    live_ids = {a.id for a in live_articles}
+    extra_matches = []
+    for article in store.all_sorted():
+        if article.id in live_ids:
+            continue
         haystack = f"{article.title} {article.summary}".lower()
         ticker_hit = any(s.ticker == query_upper for s in article.related_stocks)
         text_hit = any(term in haystack for term in extra_terms)
         if ticker_hit or text_hit:
-            matches.append(article)
+            extra_matches.append(article)
 
-    return matches[:limit]
+    return (live_articles + extra_matches)[:limit]

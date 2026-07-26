@@ -55,8 +55,17 @@ function buildCalls(articles) {
   return allCalls.slice(0, MIN_CALLS);
 }
 
+// Needs a broad sample to find enough distinct ticker-tagged stocks to rank -
+// most recent articles by source volume alone are unrelated/untagged (NAV
+// declarations, generic market wrap-ups, etc.), so the default News-feed
+// page size of 60 was leaving too few tagged articles to build a top-10 from.
+const ARTICLE_SAMPLE_SIZE = 200;
+
 export default function OverviewView({ refreshSignal }) {
-  const { articles, loading, error, pendingCount, showPending, reload } = useNewsFeed("all");
+  const { articles, loading, error, pendingCount, showPending, reload } = useNewsFeed(
+    "all",
+    ARTICLE_SAMPLE_SIZE
+  );
   useRefreshSignal(refreshSignal, reload);
 
   const calls = useMemo(() => buildCalls(articles), [articles]);
@@ -102,6 +111,7 @@ export default function OverviewView({ refreshSignal }) {
               </span>
             </div>
             <p className="call-card-headline">{call.latest.title}</p>
+            {call.latest.summary && <p className="news-summary">{call.latest.summary}</p>}
             <div className="news-datetime">{formatDateTime(call.latest.published)}</div>
             <div className="stock-row-footer">
               <span>{call.mentions} article{call.mentions > 1 ? "s" : ""} in the last 24h</span>

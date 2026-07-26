@@ -3,7 +3,7 @@ import { fetchLatestSince, fetchNews } from "../api";
 
 const POLL_INTERVAL_MS = 60_000;
 
-export function useNewsFeed(filter) {
+export function useNewsFeed(filter, limit = 60) {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,7 +17,7 @@ export function useNewsFeed(filter) {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchNews({ sentiment: filter, force });
+      const data = await fetchNews({ sentiment: filter, limit, force });
       setArticles(data.articles);
       lastServerTimeRef.current = data.server_time;
       pendingArticlesRef.current = [];
@@ -27,7 +27,7 @@ export function useNewsFeed(filter) {
     } finally {
       setLoading(false);
     }
-  }, [filter]);
+  }, [filter, limit]);
 
   useEffect(() => {
     loadInitial();

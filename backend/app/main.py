@@ -48,7 +48,10 @@ IS_DEPLOYED = bool(os.environ.get("VERCEL"))
 
 ALLOWED_ORIGINS = [
     origin.strip()
-    for origin in os.environ.get("ALLOWED_ORIGINS", "http://localhost:5173").split(",")
+    for origin in os.environ.get(
+        "ALLOWED_ORIGINS",
+        "http://localhost:5173,https://marketnews-seven.vercel.app",
+    ).split(",")
     if origin.strip()
 ]
 

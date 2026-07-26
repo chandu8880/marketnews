@@ -119,7 +119,7 @@ function App() {
         activeView={view}
         onSelect={handleSelectView}
         onClose={() => setDrawerOpen(false)}
-        phone={auth.phone}
+        email={auth.email}
         onLogout={handleLogout}
       />
 

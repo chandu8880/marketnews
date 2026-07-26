@@ -72,12 +72,12 @@ export function analyzeResult(company) {
   return apiFetch(`/api/results/analyze?${params.toString()}`);
 }
 
-export function requestOtp(phone) {
-  return apiPost("/api/auth/request-otp", { phone });
+export function requestOtp(email) {
+  return apiPost("/api/auth/request-otp", { email });
 }
 
-export function verifyOtp(phone, code) {
-  return apiPost("/api/auth/verify-otp", { phone, code });
+export function verifyOtp(email, code) {
+  return apiPost("/api/auth/verify-otp", { email, code });
 }
 
 export function checkSession() {

@@ -133,10 +133,10 @@ def require_auth(request: Request) -> str:
     having to attach an Authorization header by hand.
     """
     token = request.cookies.get(COOKIE_NAME)
-    phone = validate_session(token)
-    if not phone:
+    email = validate_session(token)
+    if not email:
         raise HTTPException(status_code=401, detail="Not authenticated")
-    return phone
+    return email
 
 
 @app.get("/api/health")
@@ -146,12 +146,12 @@ def health():
 
 @app.post("/api/auth/request-otp", response_model=OtpRequestResponse)
 def auth_request_otp(req: OtpRequest):
-    return OtpRequestResponse(**request_otp(req.phone))
+    return OtpRequestResponse(**request_otp(req.email))
 
 
 @app.post("/api/auth/verify-otp", response_model=OtpVerifyResponse)
 def auth_verify_otp(req: OtpVerifyRequest, response: Response):
-    result = verify_otp(req.phone, req.code)
+    result = verify_otp(req.email, req.code)
     if result["ok"]:
         _set_session_cookie(response, result.pop("token"))
     return OtpVerifyResponse(**result)
@@ -159,8 +159,8 @@ def auth_verify_otp(req: OtpVerifyRequest, response: Response):
 
 @app.get("/api/auth/session", response_model=SessionCheckResponse)
 def auth_session(request: Request):
-    phone = validate_session(request.cookies.get(COOKIE_NAME))
-    return SessionCheckResponse(valid=phone is not None, phone=phone)
+    email = validate_session(request.cookies.get(COOKIE_NAME))
+    return SessionCheckResponse(valid=email is not None, email=email)
 
 
 @app.post("/api/auth/logout")
@@ -182,7 +182,7 @@ def get_news(
     limit: int = Query(50, ge=1, le=200),
     sentiment: str = Query(None, description="Filter: bullish | bearish | neutral"),
     ticker: str = Query(None, description="Filter by related stock ticker"),
-    _phone: str = Depends(require_auth),
+    _email: str = Depends(require_auth),
 ):
     _ensure_news_fresh()
     articles = store.all_sorted()
@@ -198,7 +198,7 @@ def get_news(
 @app.get("/api/news/latest", response_model=LatestResponse)
 def get_latest_news(
     since: datetime = Query(..., description="ISO timestamp; returns articles fetched after this time"),
-    _phone: str = Depends(require_auth),
+    _email: str = Depends(require_auth),
 ):
     _ensure_news_fresh()
     articles = store.fetched_after(since)
@@ -209,21 +209,21 @@ def get_latest_news(
 async def search(
     q: str = Query(..., min_length=1, description="Stock/company name or ticker to search for"),
     limit: int = Query(40, ge=1, le=100),
-    _phone: str = Depends(require_auth),
+    _email: str = Depends(require_auth),
 ):
     articles = await run_in_threadpool(search_news, q, limit)
     return NewsResponse(articles=articles, server_time=now_utc(), total=len(articles))
 
 
 @app.get("/api/stocks", response_model=StocksResponse)
-def get_stocks(limit: int = Query(100, ge=1, le=200), _phone: str = Depends(require_auth)):
+def get_stocks(limit: int = Query(100, ge=1, le=200), _email: str = Depends(require_auth)):
     _ensure_news_fresh()
     stocks = aggregate_stock_sentiment(limit=limit)
     return StocksResponse(stocks=stocks, server_time=now_utc())
 
 
 @app.get("/api/dividends/upcoming", response_model=DividendsResponse)
-def get_upcoming_dividends(days: int = Query(4, ge=1, le=4), _phone: str = Depends(require_auth)):
+def get_upcoming_dividends(days: int = Query(4, ge=1, le=4), _email: str = Depends(require_auth)):
     _ensure_dividends_fresh()
     dividends, _ = dividends_cache.get()
     dividends = [d for d in dividends if d["days_away"] <= days]
@@ -231,7 +231,7 @@ def get_upcoming_dividends(days: int = Query(4, ge=1, le=4), _phone: str = Depen
 
 
 @app.get("/api/ipo", response_model=IpoResponse)
-def get_ipo(_phone: str = Depends(require_auth)):
+def get_ipo(_email: str = Depends(require_auth)):
     _ensure_ipo_fresh()
     ipos, _ = ipo_cache.get()
     return IpoResponse(ipos=ipos, server_time=now_utc())
@@ -241,7 +241,7 @@ def get_ipo(_phone: str = Depends(require_auth)):
 def get_results(
     days: int = Query(4, ge=1, le=4),
     q: str = Query(None, description="Filter by company name or ticker"),
-    _phone: str = Depends(require_auth),
+    _email: str = Depends(require_auth),
 ):
     _ensure_results_fresh()
     results, _ = results_cache.get()
@@ -262,14 +262,14 @@ def get_results(
 @app.get("/api/results/analyze", response_model=ResultAnalysis)
 async def analyze_result(
     company: str = Query(..., min_length=1, description="Company name to analyze, e.g. 'Reliance Industries Ltd'"),
-    _phone: str = Depends(require_auth),
+    _email: str = Depends(require_auth),
 ):
     analysis = await run_in_threadpool(analyze_result_company, company)
     return ResultAnalysis(**analysis)
 
 
 @app.post("/api/translate", response_model=TranslateResponse)
-async def translate(req: TranslateRequest, _phone: str = Depends(require_auth)):
+async def translate(req: TranslateRequest, _email: str = Depends(require_auth)):
     if not req.text.strip():
         raise HTTPException(status_code=400, detail="text must not be empty")
     try:

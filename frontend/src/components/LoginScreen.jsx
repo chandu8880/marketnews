@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { requestOtp, verifyOtp } from "../api";
 
-const PHONE = "9182813062";
+const EMAIL = "luciferchandu8880@gmail.com";
 const OTP_TTL_SECONDS = 120;
 
 export default function LoginScreen({ onLogin }) {
-  const [stage, setStage] = useState("phone"); // "phone" | "otp"
+  const [stage, setStage] = useState("email"); // "email" | "otp"
   const [devOtp, setDevOtp] = useState(null);
+  const [emailed, setEmailed] = useState(false);
   const [code, setCode] = useState("");
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [sending, setSending] = useState(false);
@@ -35,13 +36,14 @@ export default function LoginScreen({ onLogin }) {
   function handleSendOtp() {
     setSending(true);
     setError(null);
-    requestOtp(PHONE)
+    requestOtp(EMAIL)
       .then((res) => {
         if (!res.ok) {
           setError(res.error || "Could not send OTP.");
           return;
         }
         setDevOtp(res.dev_otp);
+        setEmailed(!!res.emailed);
         setStage("otp");
         setCode("");
         startCountdown();
@@ -54,13 +56,13 @@ export default function LoginScreen({ onLogin }) {
     e.preventDefault();
     setVerifying(true);
     setError(null);
-    verifyOtp(PHONE, code)
+    verifyOtp(EMAIL, code)
       .then((res) => {
         if (!res.ok) {
           setError(res.error || "Verification failed.");
           return;
         }
-        onLogin(PHONE);
+        onLogin(EMAIL);
       })
       .catch((e) => setError(e.message || "Verification failed."))
       .finally(() => setVerifying(false));
@@ -78,11 +80,11 @@ export default function LoginScreen({ onLogin }) {
         <p className="login-subtitle">Sign in to continue</p>
 
         <div className="login-field">
-          <label className="login-label">Phone number</label>
-          <input className="login-input" type="tel" value={PHONE} readOnly disabled />
+          <label className="login-label">Email</label>
+          <input className="login-input" type="email" value={EMAIL} readOnly disabled />
         </div>
 
-        {stage === "phone" && (
+        {stage === "email" && (
           <button className="login-btn" onClick={handleSendOtp} disabled={sending}>
             {sending ? "Sending…" : "Send OTP"}
           </button>
@@ -90,10 +92,16 @@ export default function LoginScreen({ onLogin }) {
 
         {stage === "otp" && (
           <form onSubmit={handleVerify} className="login-otp-form">
-            <div className="login-dev-otp">
-              <div className="login-dev-otp-label">DEV MODE — your OTP (not sent via real SMS)</div>
-              <div className="login-dev-otp-code">{devOtp}</div>
-            </div>
+            {emailed ? (
+              <div className="login-dev-otp">
+                <div className="login-dev-otp-label">Code sent — check {EMAIL}</div>
+              </div>
+            ) : (
+              <div className="login-dev-otp">
+                <div className="login-dev-otp-label">DEV MODE — your OTP (email not configured yet)</div>
+                <div className="login-dev-otp-code">{devOtp}</div>
+              </div>
+            )}
 
             <div className="login-field">
               <label className="login-label">

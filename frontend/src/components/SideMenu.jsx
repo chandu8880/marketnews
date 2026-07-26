@@ -7,7 +7,7 @@ const MENU_ITEMS = [
   { key: "ipo", label: "IPO", icon: "🏦" },
 ];
 
-export default function SideMenu({ open, activeView, onSelect, onClose, phone, onLogout }) {
+export default function SideMenu({ open, activeView, onSelect, onClose, email, onLogout }) {
   return (
     <>
       <div
@@ -35,7 +35,7 @@ export default function SideMenu({ open, activeView, onSelect, onClose, phone, o
         </ul>
 
         <div className="side-menu-footer">
-          {phone && <div className="side-menu-phone">Signed in as {phone}</div>}
+          {email && <div className="side-menu-phone">Signed in as {email}</div>}
           <button className="side-menu-item side-menu-logout" onClick={onLogout}>
             <span className="side-menu-icon">🚪</span>
             Logout

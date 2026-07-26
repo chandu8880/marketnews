@@ -2,14 +2,14 @@ import { useCallback, useEffect, useState } from "react";
 import { checkSession, logoutSession } from "../api";
 
 export function useAuth() {
-  const [phone, setPhone] = useState(null);
+  const [email, setEmail] = useState(null);
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     checkSession()
       .then((res) => {
-        if (!cancelled && res.valid) setPhone(res.phone);
+        if (!cancelled && res.valid) setEmail(res.email);
       })
       .catch(() => {})
       .finally(() => {
@@ -23,19 +23,19 @@ export function useAuth() {
   // The session cookie is set by the server (HttpOnly - this page never
   // sees or stores the token itself); login() just records who's signed in
   // for the UI.
-  const login = useCallback((loggedInPhone) => {
-    setPhone(loggedInPhone);
+  const login = useCallback((loggedInEmail) => {
+    setEmail(loggedInEmail);
   }, []);
 
   const logout = useCallback(() => {
     logoutSession().catch(() => {});
-    setPhone(null);
+    setEmail(null);
   }, []);
 
   return {
-    isLoggedIn: !!phone,
+    isLoggedIn: !!email,
     checking,
-    phone,
+    email,
     login,
     logout,
   };

@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 
 class OtpRequest(BaseModel):
-    phone: str
+    email: str
 
 
 class OtpRequestResponse(BaseModel):
@@ -13,10 +13,11 @@ class OtpRequestResponse(BaseModel):
     error: Optional[str] = None
     dev_otp: Optional[str] = None
     expires_in_seconds: Optional[int] = None
+    emailed: Optional[bool] = None
 
 
 class OtpVerifyRequest(BaseModel):
-    phone: str
+    email: str
     code: str
 
 
@@ -27,7 +28,7 @@ class OtpVerifyResponse(BaseModel):
 
 class SessionCheckResponse(BaseModel):
     valid: bool
-    phone: Optional[str] = None
+    email: Optional[str] = None
 
 
 class RelatedStock(BaseModel):

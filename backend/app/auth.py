@@ -1,23 +1,24 @@
-"""Single-user phone + OTP login.
+"""Single-user email + OTP login.
 
 This app has no user database or multi-tenant concept - it's a personal
-local app gated to one phone number. OTP delivery runs in "dev mode": no
-SMS provider is configured, so the code is returned straight to the
-frontend (which shows it on the login screen) instead of being texted.
-The expiry/validation logic is real either way, so swapping in a real SMS
-provider later only means changing how the code leaves this module, not
-how it's generated or checked.
+local app gated to one email address. If SMTP_USER/SMTP_APP_PASSWORD are
+configured (see email_otp.py), the code is actually emailed; otherwise it
+falls back to "dev mode" - returned straight to the frontend, which shows
+it on the login screen instead. The expiry/validation logic is identical
+either way, so a missing/misconfigured/rate-limited mailbox never locks
+anyone out of login.
 """
 import logging
 import random
-import re
 import secrets
 import threading
 from datetime import datetime, timedelta, timezone
 
+from .email_otp import send_otp_email
+
 logger = logging.getLogger("auth")
 
-ALLOWED_PHONE = "9182813062"
+ALLOWED_EMAIL = "luciferchandu8880@gmail.com"
 OTP_TTL_SECONDS = 120
 # Server-side backstop only - the cookie itself is a browser-session cookie
 # (no Max-Age), so in practice it disappears when the browser/tab closes.
@@ -25,41 +26,44 @@ OTP_TTL_SECONDS = 120
 SESSION_TTL_HOURS = 12
 
 _lock = threading.Lock()
-_otps = {}      # phone -> {"code": str, "expires_at": datetime}
-_sessions = {}  # token -> {"phone": str, "expires_at": datetime}
+_otps = {}      # email -> {"code": str, "expires_at": datetime}
+_sessions = {}  # token -> {"email": str, "expires_at": datetime}
 
 
 def _now():
     return datetime.now(timezone.utc)
 
 
-def _normalize(phone: str) -> str:
-    digits = re.sub(r"\D", "", phone or "")
-    return digits[-10:]  # last 10 digits, so +91 91828 13062 and 9182813062 match
+def _normalize(email: str) -> str:
+    return (email or "").strip().lower()
 
 
-def request_otp(phone: str):
-    normalized = _normalize(phone)
-    if normalized != ALLOWED_PHONE:
-        return {"ok": False, "error": "This app is only set up for one phone number."}
+def request_otp(email: str):
+    normalized = _normalize(email)
+    if normalized != ALLOWED_EMAIL:
+        return {"ok": False, "error": "This app is only set up for one email address."}
 
     code = f"{random.randint(0, 999999):06d}"
     expires_at = _now() + timedelta(seconds=OTP_TTL_SECONDS)
     with _lock:
         _otps[normalized] = {"code": code, "expires_at": expires_at}
 
-    logger.info("OTP generated for %s (dev mode - not sent via real SMS)", normalized)
-    return {"ok": True, "dev_otp": code, "expires_in_seconds": OTP_TTL_SECONDS}
+    emailed = send_otp_email(normalized, code)
+    logger.info("OTP generated for %s (emailed=%s)", normalized, emailed)
+
+    if emailed:
+        return {"ok": True, "dev_otp": None, "expires_in_seconds": OTP_TTL_SECONDS, "emailed": True}
+    return {"ok": True, "dev_otp": code, "expires_in_seconds": OTP_TTL_SECONDS, "emailed": False}
 
 
-def verify_otp(phone: str, code: str):
-    normalized = _normalize(phone)
+def verify_otp(email: str, code: str):
+    normalized = _normalize(email)
     code = (code or "").strip()
 
     with _lock:
         entry = _otps.get(normalized)
         if not entry:
-            return {"ok": False, "error": "No OTP requested for this number yet."}
+            return {"ok": False, "error": "No OTP requested for this email yet."}
         if _now() > entry["expires_at"]:
             del _otps[normalized]
             return {"ok": False, "error": "OTP expired. Request a new one."}
@@ -68,7 +72,7 @@ def verify_otp(phone: str, code: str):
 
         del _otps[normalized]
         token = secrets.token_urlsafe(32)
-        _sessions[token] = {"phone": normalized, "expires_at": _now() + timedelta(hours=SESSION_TTL_HOURS)}
+        _sessions[token] = {"email": normalized, "expires_at": _now() + timedelta(hours=SESSION_TTL_HOURS)}
 
     return {"ok": True, "token": token}
 
@@ -83,7 +87,7 @@ def validate_session(token: str):
         if _now() > entry["expires_at"]:
             del _sessions[token]
             return None
-        return entry["phone"]
+        return entry["email"]
 
 
 def logout(token: str):

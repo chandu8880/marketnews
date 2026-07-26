@@ -1,4 +1,8 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+// "??" (not "||") so an intentionally-empty VITE_API_BASE_URL (production:
+// same-origin relative /api/* calls, proxied by frontend/vercel.json) isn't
+// overridden by the localhost fallback - only an unset/undefined value should
+// fall back to it.
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 
 async function handle(res) {
   if (!res.ok) {

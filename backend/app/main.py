@@ -9,11 +9,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .auth import logout as auth_logout
 from .auth import request_otp, validate_session, verify_otp
-from .cache import dividends_cache, ipo_cache, results_cache, stock_universe_cache
+from .cache import dividends_cache, indices_cache, ipo_cache, results_cache, stock_universe_cache
 from .models import (
     DividendsResponse,
     IpoResponse,
     LatestResponse,
+    MarketIndicesResponse,
     NewsResponse,
     OtpRequest,
     OtpRequestResponse,
@@ -30,11 +31,13 @@ from .models import (
 from .results import analyze_result_company, attach_related_news
 from .scheduler import (
     DIVIDENDS_REFRESH_SECONDS,
+    INDICES_REFRESH_SECONDS,
     IPO_REFRESH_SECONDS,
     NEWS_REFRESH_SECONDS,
     RESULTS_REFRESH_SECONDS,
     STOCK_UNIVERSE_REFRESH_SECONDS,
     refresh_dividends,
+    refresh_indices,
     refresh_ipo,
     refresh_news,
     refresh_results,
@@ -132,6 +135,11 @@ def _ensure_results_fresh(force: bool = False):
 def _ensure_stock_universe_fresh(force: bool = False):
     if force or stock_universe_cache.is_stale(STOCK_UNIVERSE_REFRESH_SECONDS + 300):
         refresh_stock_universe()
+
+
+def _ensure_indices_fresh(force: bool = False):
+    if force or indices_cache.is_stale(INDICES_REFRESH_SECONDS + 30):
+        refresh_indices()
 
 
 def require_auth(request: Request) -> str:
@@ -241,6 +249,13 @@ def get_stock_universe(force: bool = Query(False), _email: str = Depends(require
     _ensure_stock_universe_fresh(force)
     stocks, _ = stock_universe_cache.get()
     return StockUniverseResponse(stocks=stocks, server_time=now_utc())
+
+
+@app.get("/api/market/indices", response_model=MarketIndicesResponse)
+def get_market_indices(force: bool = Query(False), _email: str = Depends(require_auth)):
+    _ensure_indices_fresh(force)
+    indices, _ = indices_cache.get()
+    return MarketIndicesResponse(indices=indices, server_time=now_utc())
 
 
 @app.get("/api/dividends/upcoming", response_model=DividendsResponse)

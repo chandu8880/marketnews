@@ -58,6 +58,12 @@ export function fetchStockUniverse() {
   return apiFetch("/api/stocks/universe");
 }
 
+export function fetchMarketIndices(force = false) {
+  const params = new URLSearchParams();
+  if (force) params.set("force", "true");
+  return apiFetch(`/api/market/indices?${params.toString()}`);
+}
+
 export function fetchDividends(days = 4, force = false) {
   const params = new URLSearchParams({ days: String(days) });
   if (force) params.set("force", "true");

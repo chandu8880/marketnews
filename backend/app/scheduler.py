@@ -4,10 +4,11 @@ from datetime import datetime
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from .cache import dividends_cache, ipo_cache, results_cache, stock_universe_cache
+from .cache import dividends_cache, indices_cache, ipo_cache, results_cache, stock_universe_cache
 from .dividends import fetch_upcoming_dividends
 from .ingest import refresh_news
 from .ipo import fetch_ipo_data
+from .market_indices import fetch_market_indices
 from .results import fetch_quarterly_results
 from .stock_universe import fetch_stock_universe
 
@@ -24,6 +25,7 @@ DIVIDENDS_REFRESH_SECONDS = 30 * 60
 IPO_REFRESH_SECONDS = 15 * 60
 RESULTS_REFRESH_SECONDS = 20 * 60
 STOCK_UNIVERSE_REFRESH_SECONDS = 12 * 60 * 60  # listings barely change day to day
+INDICES_REFRESH_SECONDS = 60
 
 _scheduler = BackgroundScheduler()
 
@@ -60,6 +62,13 @@ def refresh_stock_universe():
         logger.exception("Stock universe refresh failed")
 
 
+def refresh_indices():
+    try:
+        indices_cache.set(fetch_market_indices())
+    except Exception:
+        logger.exception("Market indices refresh failed")
+
+
 def start_scheduler():
     # Locally, news is populated synchronously so the feed isn't empty on
     # first load. On Vercel this would block the app from responding to
@@ -94,6 +103,10 @@ def start_scheduler():
     _scheduler.add_job(
         refresh_stock_universe, "interval", seconds=STOCK_UNIVERSE_REFRESH_SECONDS,
         id="refresh_stock_universe", max_instances=1, coalesce=True, next_run_time=_now(),
+    )
+    _scheduler.add_job(
+        refresh_indices, "interval", seconds=INDICES_REFRESH_SECONDS,
+        id="refresh_indices", max_instances=1, coalesce=True, next_run_time=_now(),
     )
     _scheduler.start()
 

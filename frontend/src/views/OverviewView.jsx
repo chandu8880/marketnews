@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import IndicesTicker from "../components/IndicesTicker";
 import { formatDateTime, timeAgo } from "../utils/time";
 import { useNewsFeed } from "../hooks/useNewsFeed";
 import { useRefreshSignal } from "../hooks/useRefreshSignal";
@@ -71,54 +72,54 @@ export default function OverviewView({ refreshSignal }) {
   const calls = useMemo(() => buildCalls(articles), [articles]);
 
   return (
-    <div className="news-feed">
-      <div className="view-intro">
-        Today's bullish/bearish calls, one per stock — based on the average sentiment of
-        everything published about it in the last 24h, not just one headline. Shows at least
-        the top 10; calls marked "weak" fell below our confidence bar but are shown anyway
-        so the screen isn't empty on a quiet news day. Not investment advice.
-      </div>
+    <>
+      <IndicesTicker />
+      <div className="news-feed">
+        <div className="view-intro">
+          Today's bullish/bearish calls, one per stock. Not investment advice.
+        </div>
 
-      {pendingCount > 0 && (
-        <button className="new-articles-banner" onClick={showPending}>
-          {pendingCount} new update{pendingCount > 1 ? "s" : ""} — tap to show
-        </button>
-      )}
+        {pendingCount > 0 && (
+          <button className="new-articles-banner" onClick={showPending}>
+            {pendingCount} new update{pendingCount > 1 ? "s" : ""} — tap to show
+          </button>
+        )}
 
-      {loading && <div className="status-msg">Finding today's most confident calls…</div>}
-      {error && !loading && <div className="status-msg status-error">{error}</div>}
-      {!loading && !error && calls.length === 0 && (
-        <div className="status-msg">No confident signal yet — check back soon as news comes in.</div>
-      )}
-      {!loading &&
-        !error &&
-        calls.map((call) => (
-          <a
-            key={call.ticker}
-            className={`stock-row-card call-card call-card-${call.direction} ${!call.strong ? "call-card-weak" : ""}`}
-            href={call.latest.link}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <div className="stock-row-top">
-              <div>
-                <span className="stock-row-ticker">{call.ticker}</span>
-                <span className="stock-row-name">{call.name}</span>
+        {loading && <div className="status-msg">Finding today's most confident calls…</div>}
+        {error && !loading && <div className="status-msg status-error">{error}</div>}
+        {!loading && !error && calls.length === 0 && (
+          <div className="status-msg">No confident signal yet — check back soon as news comes in.</div>
+        )}
+        {!loading &&
+          !error &&
+          calls.map((call) => (
+            <a
+              key={call.ticker}
+              className={`stock-row-card call-card call-card-${call.direction} ${!call.strong ? "call-card-weak" : ""}`}
+              href={call.latest.link}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <div className="stock-row-top">
+                <div>
+                  <span className="stock-row-ticker">{call.ticker}</span>
+                  <span className="stock-row-name">{call.name}</span>
+                </div>
+                <span className={`sentiment-badge badge-${call.direction}`}>
+                  {call.direction === "bullish" ? "▲" : "▼"} {call.confidence}%
+                  {!call.strong && <span className="call-weak-tag"> · weak</span>}
+                </span>
               </div>
-              <span className={`sentiment-badge badge-${call.direction}`}>
-                {call.direction === "bullish" ? "▲" : "▼"} {call.confidence}%
-                {!call.strong && <span className="call-weak-tag"> · weak</span>}
-              </span>
-            </div>
-            <p className="call-card-headline">{call.latest.title}</p>
-            {call.latest.summary && <p className="news-summary">{call.latest.summary}</p>}
-            <div className="news-datetime">{formatDateTime(call.latest.published)}</div>
-            <div className="stock-row-footer">
-              <span>{call.mentions} article{call.mentions > 1 ? "s" : ""} in the last 24h</span>
-              <span>{timeAgo(call.latest.published)}</span>
-            </div>
-          </a>
-        ))}
-    </div>
+              <p className="call-card-headline">{call.latest.title}</p>
+              {call.latest.summary && <p className="news-summary">{call.latest.summary}</p>}
+              <div className="news-datetime">{formatDateTime(call.latest.published)}</div>
+              <div className="stock-row-footer">
+                <span>{call.mentions} article{call.mentions > 1 ? "s" : ""} in the last 24h</span>
+                <span>{timeAgo(call.latest.published)}</span>
+              </div>
+            </a>
+          ))}
+      </div>
+    </>
   );
 }

@@ -179,3 +179,15 @@ class StockUniverseItem(BaseModel):
 class StockUniverseResponse(BaseModel):
     stocks: List[StockUniverseItem]
     server_time: datetime
+
+
+class MarketIndex(BaseModel):
+    name: str
+    value: float
+    change: Optional[float]
+    change_pct: Optional[float]
+
+
+class MarketIndicesResponse(BaseModel):
+    indices: List[MarketIndex]
+    server_time: datetime

@@ -22,6 +22,12 @@ class TimedCache:
         with self._lock:
             return list(self._data), self._updated_at
 
+    def is_stale(self, max_age_seconds: float) -> bool:
+        with self._lock:
+            if self._updated_at is None:
+                return True
+            return (now_utc() - self._updated_at).total_seconds() > max_age_seconds
+
 
 dividends_cache = TimedCache()
 ipo_cache = TimedCache()

@@ -16,6 +16,7 @@ class ArticleStore:
     def __init__(self):
         self._lock = threading.Lock()
         self._articles: Dict[str, Article] = {}
+        self._last_refreshed_at: Optional[datetime] = None
 
     def upsert_many(self, articles: List[Article]) -> int:
         """Add new articles (by id). Returns count of newly-added articles."""
@@ -29,7 +30,14 @@ class ArticleStore:
                 ordered = sorted(self._articles.values(), key=lambda a: a.published, reverse=True)
                 keep = ordered[:MAX_ARTICLES]
                 self._articles = {a.id: a for a in keep}
+            self._last_refreshed_at = now_utc()
         return added
+
+    def is_stale(self, max_age_seconds: float) -> bool:
+        with self._lock:
+            if self._last_refreshed_at is None:
+                return True
+            return (now_utc() - self._last_refreshed_at).total_seconds() > max_age_seconds
 
     def get(self, article_id: str) -> Optional[Article]:
         with self._lock:

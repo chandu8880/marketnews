@@ -27,7 +27,18 @@ from .models import (
     TranslateResponse,
 )
 from .results import analyze_result_company, attach_related_news
-from .scheduler import start_scheduler, stop_scheduler
+from .scheduler import (
+    DIVIDENDS_REFRESH_SECONDS,
+    IPO_REFRESH_SECONDS,
+    NEWS_REFRESH_SECONDS,
+    RESULTS_REFRESH_SECONDS,
+    refresh_dividends,
+    refresh_ipo,
+    refresh_news,
+    refresh_results,
+    start_scheduler,
+    stop_scheduler,
+)
 from .search import search_news
 from .stocks_analysis import aggregate_stock_sentiment
 from .store import now_utc, store
@@ -86,6 +97,32 @@ def _set_session_cookie(response: Response, token: str):
         secure=IS_DEPLOYED,
         path="/",
     )
+
+
+def _ensure_news_fresh():
+    # Serverless containers each keep their own in-memory store, and the
+    # background scheduler thread isn't guaranteed to get CPU time between
+    # requests - so on a cold/fresh container the store can otherwise stay
+    # empty forever. Refreshing synchronously here (only when actually
+    # stale) makes the *first* request to a fresh container slower, but
+    # guarantees data instead of silently serving nothing.
+    if store.is_stale(NEWS_REFRESH_SECONDS + 30):
+        refresh_news()
+
+
+def _ensure_dividends_fresh():
+    if dividends_cache.is_stale(DIVIDENDS_REFRESH_SECONDS + 60):
+        refresh_dividends()
+
+
+def _ensure_ipo_fresh():
+    if ipo_cache.is_stale(IPO_REFRESH_SECONDS + 60):
+        refresh_ipo()
+
+
+def _ensure_results_fresh():
+    if results_cache.is_stale(RESULTS_REFRESH_SECONDS + 60):
+        refresh_results()
 
 
 def require_auth(request: Request) -> str:
@@ -147,6 +184,7 @@ def get_news(
     ticker: str = Query(None, description="Filter by related stock ticker"),
     _phone: str = Depends(require_auth),
 ):
+    _ensure_news_fresh()
     articles = store.all_sorted()
     if sentiment:
         articles = [a for a in articles if a.sentiment_label == sentiment.lower()]
@@ -162,6 +200,7 @@ def get_latest_news(
     since: datetime = Query(..., description="ISO timestamp; returns articles fetched after this time"),
     _phone: str = Depends(require_auth),
 ):
+    _ensure_news_fresh()
     articles = store.fetched_after(since)
     return LatestResponse(articles=articles, server_time=now_utc())
 
@@ -178,12 +217,14 @@ async def search(
 
 @app.get("/api/stocks", response_model=StocksResponse)
 def get_stocks(limit: int = Query(100, ge=1, le=200), _phone: str = Depends(require_auth)):
+    _ensure_news_fresh()
     stocks = aggregate_stock_sentiment(limit=limit)
     return StocksResponse(stocks=stocks, server_time=now_utc())
 
 
 @app.get("/api/dividends/upcoming", response_model=DividendsResponse)
 def get_upcoming_dividends(days: int = Query(4, ge=1, le=4), _phone: str = Depends(require_auth)):
+    _ensure_dividends_fresh()
     dividends, _ = dividends_cache.get()
     dividends = [d for d in dividends if d["days_away"] <= days]
     return DividendsResponse(dividends=dividends, server_time=now_utc())
@@ -191,6 +232,7 @@ def get_upcoming_dividends(days: int = Query(4, ge=1, le=4), _phone: str = Depen
 
 @app.get("/api/ipo", response_model=IpoResponse)
 def get_ipo(_phone: str = Depends(require_auth)):
+    _ensure_ipo_fresh()
     ipos, _ = ipo_cache.get()
     return IpoResponse(ipos=ipos, server_time=now_utc())
 
@@ -201,6 +243,7 @@ def get_results(
     q: str = Query(None, description="Filter by company name or ticker"),
     _phone: str = Depends(require_auth),
 ):
+    _ensure_results_fresh()
     results, _ = results_cache.get()
     cutoff_date = (date.today() - timedelta(days=days)).isoformat()
     results = [r for r in results if r["published"][:10] >= cutoff_date]

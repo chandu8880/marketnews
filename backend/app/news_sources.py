@@ -3,6 +3,7 @@ from multiple trusted, publicly available sources (no API key required).
 """
 import hashlib
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 
 import feedparser
@@ -84,8 +85,21 @@ def fetch_feed(source: str, url: str, max_items: int = None):
 
 
 def fetch_all_feeds():
-    """Fetch every configured feed and return a flat list of normalized articles."""
+    """Fetch every configured feed concurrently and return a flat list of
+    normalized articles. Feeds are fetched in parallel (rather than one at a
+    time) since sequentially fetching 12 feeds can take long enough to blow
+    past a serverless platform's request timeout on a cold start.
+    """
     all_articles = []
-    for feed in FEEDS:
-        all_articles.extend(fetch_feed(feed["source"], feed["url"], feed.get("max_items")))
+    with ThreadPoolExecutor(max_workers=len(FEEDS)) as pool:
+        futures = {
+            pool.submit(fetch_feed, feed["source"], feed["url"], feed.get("max_items")): feed
+            for feed in FEEDS
+        }
+        for future in as_completed(futures):
+            feed = futures[future]
+            try:
+                all_articles.extend(future.result())
+            except Exception:
+                logger.exception("Feed %s raised outside fetch_feed's own handling", feed["source"])
     return all_articles

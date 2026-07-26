@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { analyzeResult, fetchResults } from "../api";
-import { timeAgo } from "../utils/time";
+import { formatDateTime, timeAgo } from "../utils/time";
 import FilterTabs from "../components/FilterTabs";
 import { useRefreshSignal } from "../hooks/useRefreshSignal";
 
@@ -39,6 +39,7 @@ function ResultCard({ r }) {
         <div>
           <div className="result-company">{r.company}</div>
           <div className="result-time">{timeAgo(r.published)}</div>
+          <div className="news-datetime">{formatDateTime(r.published)}</div>
         </div>
         <span className={`sentiment-badge ${meta.cls}`}>
           {meta.icon} {meta.label}
@@ -133,10 +134,10 @@ export default function ResultsView({ refreshSignal }) {
   const [query, setQuery] = useState("");
   const [sentimentFilter, setSentimentFilter] = useState("all");
 
-  const load = useCallback(() => {
+  const load = useCallback((force = false) => {
     setLoading(true);
     setError(null);
-    return fetchResults({ days: 4 })
+    return fetchResults({ days: 4, force })
       .then((data) => setResults(data.results))
       .catch((e) => setError(e.message || "Failed to load results"))
       .finally(() => setLoading(false));

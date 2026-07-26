@@ -5,6 +5,7 @@ import StockSentimentBar from "../components/StockSentimentBar";
 import { fetchNews } from "../api";
 import { useRefreshSignal } from "../hooks/useRefreshSignal";
 import { useSearch } from "../hooks/useSearch";
+import { useStockUniverse } from "../hooks/useStockUniverse";
 import { useTrackedStocks } from "../hooks/useTrackedStocks";
 
 const SENTIMENT_META = {
@@ -75,9 +76,20 @@ function StockDetail({ stock, onBack }) {
 
 export default function StocksView({ refreshSignal }) {
   const { stocks, loading, error, reload } = useTrackedStocks();
+  const universe = useStockUniverse();
   const [selected, setSelected] = useState(null);
   const search = useSearch();
   useRefreshSignal(refreshSignal, reload);
+
+  // Autocomplete suggestions cover every listed Indian stock, not just the
+  // ~50 currently trending in news - tracked ones (which carry live
+  // sentiment) take priority over the bare universe entry for the same symbol.
+  const suggestions = useMemo(() => {
+    const bySymbol = new Map();
+    for (const s of universe) bySymbol.set(s.symbol, { ticker: s.symbol, name: s.name });
+    for (const s of stocks) bySymbol.set(s.ticker, s);
+    return Array.from(bySymbol.values());
+  }, [universe, stocks]);
 
   const matches = useMemo(() => {
     if (!search.active) return stocks;
@@ -103,14 +115,15 @@ export default function StocksView({ refreshSignal }) {
           onSearch={search.runSearch}
           onClear={search.clearSearch}
           active={search.active}
-          suggestions={stocks}
+          suggestions={suggestions}
         />
       </div>
 
       <div className="news-feed">
         {!search.active && (
           <div className="view-intro">
-            Sentiment across all tracked NSE stocks, based on the news currently in the feed.
+            Top 50 stocks by news activity today. Search covers every listed Indian stock, not
+            just these — pick any company and it'll pull live news even if it isn't trending yet.
           </div>
         )}
         {search.active && !showNewsFallback && (

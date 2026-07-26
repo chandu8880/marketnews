@@ -169,3 +169,13 @@ class IpoItem(BaseModel):
 class IpoResponse(BaseModel):
     ipos: List[IpoItem]
     server_time: datetime
+
+
+class StockUniverseItem(BaseModel):
+    symbol: str
+    name: str
+
+
+class StockUniverseResponse(BaseModel):
+    stocks: List[StockUniverseItem]
+    server_time: datetime

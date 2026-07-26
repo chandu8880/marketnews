@@ -570,6 +570,12 @@
   flex: 1;
 }
 
+.news-datetime {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-top: -4px;
+}
+
 .sentiment-badge {
   font-size: 11px;
   font-weight: 700;
@@ -798,6 +804,15 @@
 
 .call-card-bearish {
   border-left-color: var(--bearish);
+}
+
+.call-card-weak {
+  opacity: 0.72;
+}
+
+.call-weak-tag {
+  font-weight: 500;
+  opacity: 0.8;
 }
 
 .call-card-headline {

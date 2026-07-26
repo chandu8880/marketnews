@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .auth import logout as auth_logout
 from .auth import request_otp, validate_session, verify_otp
-from .cache import dividends_cache, ipo_cache, results_cache
+from .cache import dividends_cache, ipo_cache, results_cache, stock_universe_cache
 from .models import (
     DividendsResponse,
     IpoResponse,
@@ -23,6 +23,7 @@ from .models import (
     ResultsResponse,
     SessionCheckResponse,
     StocksResponse,
+    StockUniverseResponse,
     TranslateRequest,
     TranslateResponse,
 )
@@ -32,10 +33,12 @@ from .scheduler import (
     IPO_REFRESH_SECONDS,
     NEWS_REFRESH_SECONDS,
     RESULTS_REFRESH_SECONDS,
+    STOCK_UNIVERSE_REFRESH_SECONDS,
     refresh_dividends,
     refresh_ipo,
     refresh_news,
     refresh_results,
+    refresh_stock_universe,
     start_scheduler,
     stop_scheduler,
 )
@@ -99,30 +102,36 @@ def _set_session_cookie(response: Response, token: str):
     )
 
 
-def _ensure_news_fresh():
+def _ensure_news_fresh(force: bool = False):
     # Serverless containers each keep their own in-memory store, and the
     # background scheduler thread isn't guaranteed to get CPU time between
     # requests - so on a cold/fresh container the store can otherwise stay
     # empty forever. Refreshing synchronously here (only when actually
-    # stale) makes the *first* request to a fresh container slower, but
-    # guarantees data instead of silently serving nothing.
-    if store.is_stale(NEWS_REFRESH_SECONDS + 30):
+    # stale, or when the user explicitly hit the refresh button) makes that
+    # particular request slower, but guarantees data instead of silently
+    # serving nothing / stale.
+    if force or store.is_stale(NEWS_REFRESH_SECONDS + 30):
         refresh_news()
 
 
-def _ensure_dividends_fresh():
-    if dividends_cache.is_stale(DIVIDENDS_REFRESH_SECONDS + 60):
+def _ensure_dividends_fresh(force: bool = False):
+    if force or dividends_cache.is_stale(DIVIDENDS_REFRESH_SECONDS + 60):
         refresh_dividends()
 
 
-def _ensure_ipo_fresh():
-    if ipo_cache.is_stale(IPO_REFRESH_SECONDS + 60):
+def _ensure_ipo_fresh(force: bool = False):
+    if force or ipo_cache.is_stale(IPO_REFRESH_SECONDS + 60):
         refresh_ipo()
 
 
-def _ensure_results_fresh():
-    if results_cache.is_stale(RESULTS_REFRESH_SECONDS + 60):
+def _ensure_results_fresh(force: bool = False):
+    if force or results_cache.is_stale(RESULTS_REFRESH_SECONDS + 60):
         refresh_results()
+
+
+def _ensure_stock_universe_fresh(force: bool = False):
+    if force or stock_universe_cache.is_stale(STOCK_UNIVERSE_REFRESH_SECONDS + 300):
+        refresh_stock_universe()
 
 
 def require_auth(request: Request) -> str:
@@ -182,9 +191,10 @@ def get_news(
     limit: int = Query(50, ge=1, le=200),
     sentiment: str = Query(None, description="Filter: bullish | bearish | neutral"),
     ticker: str = Query(None, description="Filter by related stock ticker"),
+    force: bool = Query(False, description="Bypass cache staleness check and refetch now"),
     _email: str = Depends(require_auth),
 ):
-    _ensure_news_fresh()
+    _ensure_news_fresh(force)
     articles = store.all_sorted()
     if sentiment:
         articles = [a for a in articles if a.sentiment_label == sentiment.lower()]
@@ -216,23 +226,38 @@ async def search(
 
 
 @app.get("/api/stocks", response_model=StocksResponse)
-def get_stocks(limit: int = Query(100, ge=1, le=200), _email: str = Depends(require_auth)):
-    _ensure_news_fresh()
+def get_stocks(
+    limit: int = Query(50, ge=1, le=200),
+    force: bool = Query(False, description="Bypass cache staleness check and refetch now"),
+    _email: str = Depends(require_auth),
+):
+    _ensure_news_fresh(force)
     stocks = aggregate_stock_sentiment(limit=limit)
     return StocksResponse(stocks=stocks, server_time=now_utc())
 
 
+@app.get("/api/stocks/universe", response_model=StockUniverseResponse)
+def get_stock_universe(force: bool = Query(False), _email: str = Depends(require_auth)):
+    _ensure_stock_universe_fresh(force)
+    stocks, _ = stock_universe_cache.get()
+    return StockUniverseResponse(stocks=stocks, server_time=now_utc())
+
+
 @app.get("/api/dividends/upcoming", response_model=DividendsResponse)
-def get_upcoming_dividends(days: int = Query(4, ge=1, le=4), _email: str = Depends(require_auth)):
-    _ensure_dividends_fresh()
+def get_upcoming_dividends(
+    days: int = Query(4, ge=1, le=4),
+    force: bool = Query(False, description="Bypass cache staleness check and refetch now"),
+    _email: str = Depends(require_auth),
+):
+    _ensure_dividends_fresh(force)
     dividends, _ = dividends_cache.get()
     dividends = [d for d in dividends if d["days_away"] <= days]
     return DividendsResponse(dividends=dividends, server_time=now_utc())
 
 
 @app.get("/api/ipo", response_model=IpoResponse)
-def get_ipo(_email: str = Depends(require_auth)):
-    _ensure_ipo_fresh()
+def get_ipo(force: bool = Query(False), _email: str = Depends(require_auth)):
+    _ensure_ipo_fresh(force)
     ipos, _ = ipo_cache.get()
     return IpoResponse(ipos=ipos, server_time=now_utc())
 
@@ -241,9 +266,10 @@ def get_ipo(_email: str = Depends(require_auth)):
 def get_results(
     days: int = Query(4, ge=1, le=4),
     q: str = Query(None, description="Filter by company name or ticker"),
+    force: bool = Query(False, description="Bypass cache staleness check and refetch now"),
     _email: str = Depends(require_auth),
 ):
-    _ensure_results_fresh()
+    _ensure_results_fresh(force)
     results, _ = results_cache.get()
     cutoff_date = (date.today() - timedelta(days=days)).isoformat()
     results = [r for r in results if r["published"][:10] >= cutoff_date]

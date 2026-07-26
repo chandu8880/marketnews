@@ -26,10 +26,10 @@ export default function IpoView({ refreshSignal }) {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("Open");
 
-  const load = useCallback(() => {
+  const load = useCallback((force = false) => {
     setLoading(true);
     setError(null);
-    return fetchIpos()
+    return fetchIpos(force)
       .then((data) => setIpos(data.ipos))
       .catch((e) => setError(e.message || "Failed to load IPO data"))
       .finally(() => setLoading(false));

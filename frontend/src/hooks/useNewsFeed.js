@@ -13,11 +13,11 @@ export function useNewsFeed(filter) {
   const filterRef = useRef(filter);
   filterRef.current = filter;
 
-  const loadInitial = useCallback(async () => {
+  const loadInitial = useCallback(async (force = false) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchNews({ sentiment: filter });
+      const data = await fetchNews({ sentiment: filter, force });
       setArticles(data.articles);
       lastServerTimeRef.current = data.server_time;
       pendingArticlesRef.current = [];

@@ -4,11 +4,12 @@ from datetime import datetime
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from .cache import dividends_cache, ipo_cache, results_cache
+from .cache import dividends_cache, ipo_cache, results_cache, stock_universe_cache
 from .dividends import fetch_upcoming_dividends
 from .ingest import refresh_news
 from .ipo import fetch_ipo_data
 from .results import fetch_quarterly_results
+from .stock_universe import fetch_stock_universe
 
 logger = logging.getLogger("scheduler")
 
@@ -22,6 +23,7 @@ NEWS_REFRESH_SECONDS = 60
 DIVIDENDS_REFRESH_SECONDS = 30 * 60
 IPO_REFRESH_SECONDS = 15 * 60
 RESULTS_REFRESH_SECONDS = 20 * 60
+STOCK_UNIVERSE_REFRESH_SECONDS = 12 * 60 * 60  # listings barely change day to day
 
 _scheduler = BackgroundScheduler()
 
@@ -49,6 +51,13 @@ def refresh_results():
         results_cache.set(fetch_quarterly_results(within_days=4))
     except Exception:
         logger.exception("Quarterly results refresh failed")
+
+
+def refresh_stock_universe():
+    try:
+        stock_universe_cache.set(fetch_stock_universe())
+    except Exception:
+        logger.exception("Stock universe refresh failed")
 
 
 def start_scheduler():
@@ -81,6 +90,10 @@ def start_scheduler():
     _scheduler.add_job(
         refresh_results, "interval", seconds=RESULTS_REFRESH_SECONDS,
         id="refresh_results", max_instances=1, coalesce=True, next_run_time=_now(),
+    )
+    _scheduler.add_job(
+        refresh_stock_universe, "interval", seconds=STOCK_UNIVERSE_REFRESH_SECONDS,
+        id="refresh_stock_universe", max_instances=1, coalesce=True, next_run_time=_now(),
     )
     _scheduler.start()
 

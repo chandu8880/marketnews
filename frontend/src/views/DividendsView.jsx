@@ -13,10 +13,10 @@ export default function DividendsView({ refreshSignal }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const load = useCallback(() => {
+  const load = useCallback((force = false) => {
     setLoading(true);
     setError(null);
-    return fetchDividends(4)
+    return fetchDividends(4, force)
       .then((data) => setDividends(data.dividends))
       .catch((e) => setError(e.message || "Failed to load dividends"))
       .finally(() => setLoading(false));

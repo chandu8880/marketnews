@@ -9,10 +9,10 @@ export function useTrackedStocks() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const reload = useCallback(() => {
+  const reload = useCallback((force = false) => {
     setLoading(true);
     setError(null);
-    return fetchStocks()
+    return fetchStocks(50, force)
       .then((data) => setStocks(data.stocks))
       .catch((e) => setError(e.message || "Failed to load stocks"))
       .finally(() => setLoading(false));

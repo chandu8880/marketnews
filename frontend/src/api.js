@@ -26,10 +26,11 @@ function apiPost(path, body) {
   });
 }
 
-export function fetchNews({ limit = 60, sentiment = null, ticker = null } = {}) {
+export function fetchNews({ limit = 60, sentiment = null, ticker = null, force = false } = {}) {
   const params = new URLSearchParams({ limit: String(limit) });
   if (sentiment && sentiment !== "all") params.set("sentiment", sentiment);
   if (ticker) params.set("ticker", ticker);
+  if (force) params.set("force", "true");
   return apiFetch(`/api/news?${params.toString()}`);
 }
 
@@ -47,23 +48,32 @@ export function searchNews(q, limit = 40) {
   return apiFetch(`/api/news/search?${params.toString()}`);
 }
 
-export function fetchStocks(limit = 100) {
+export function fetchStocks(limit = 50, force = false) {
   const params = new URLSearchParams({ limit: String(limit) });
+  if (force) params.set("force", "true");
   return apiFetch(`/api/stocks?${params.toString()}`);
 }
 
-export function fetchDividends(days = 4) {
+export function fetchStockUniverse() {
+  return apiFetch("/api/stocks/universe");
+}
+
+export function fetchDividends(days = 4, force = false) {
   const params = new URLSearchParams({ days: String(days) });
+  if (force) params.set("force", "true");
   return apiFetch(`/api/dividends/upcoming?${params.toString()}`);
 }
 
-export function fetchIpos() {
-  return apiFetch("/api/ipo");
+export function fetchIpos(force = false) {
+  const params = new URLSearchParams();
+  if (force) params.set("force", "true");
+  return apiFetch(`/api/ipo?${params.toString()}`);
 }
 
-export function fetchResults({ days = 4, q = null } = {}) {
+export function fetchResults({ days = 4, q = null, force = false } = {}) {
   const params = new URLSearchParams({ days: String(days) });
   if (q) params.set("q", q);
+  if (force) params.set("force", "true");
   return apiFetch(`/api/results?${params.toString()}`);
 }
 

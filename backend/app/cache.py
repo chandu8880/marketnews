@@ -32,3 +32,4 @@ class TimedCache:
 dividends_cache = TimedCache()
 ipo_cache = TimedCache()
 results_cache = TimedCache()
+stock_universe_cache = TimedCache()

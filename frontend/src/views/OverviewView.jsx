@@ -1,10 +1,11 @@
 import { useMemo } from "react";
-import { timeAgo } from "../utils/time";
+import { formatDateTime, timeAgo } from "../utils/time";
 import { useNewsFeed } from "../hooks/useNewsFeed";
 import { useRefreshSignal } from "../hooks/useRefreshSignal";
 
 const WINDOW_MS = 24 * 60 * 60 * 1000; // "today's" news
-const CONFIDENCE_THRESHOLD = 0.35; // min |avg sentiment| across a stock's recent news to call it a signal
+const CONFIDENCE_THRESHOLD = 0.35; // min |avg sentiment| across a stock's recent news to call it a strong signal
+const MIN_CALLS = 10; // always show at least this many, backfilling with weaker signals if needed
 
 // One bullish/bearish call per stock, built from the average sentiment of
 // everything published about it in the last 24h - not a single article's
@@ -30,22 +31,28 @@ function buildCalls(articles) {
     }
   }
 
-  const calls = [];
+  const allCalls = [];
   for (const entry of byTicker.values()) {
     const avg = entry.scores.reduce((a, b) => a + b, 0) / entry.scores.length;
-    if (Math.abs(avg) < CONFIDENCE_THRESHOLD) continue;
-    calls.push({
+    allCalls.push({
       ticker: entry.ticker,
       name: entry.name,
       direction: avg > 0 ? "bullish" : "bearish",
       confidence: Math.round(Math.abs(avg) * 100),
+      strong: Math.abs(avg) >= CONFIDENCE_THRESHOLD,
       mentions: entry.scores.length,
       latest: entry.latest,
     });
   }
 
-  calls.sort((a, b) => b.confidence - a.confidence);
-  return calls;
+  allCalls.sort((a, b) => b.confidence - a.confidence);
+
+  // Show every strong-confidence call, but always at least MIN_CALLS total -
+  // backfilling with the next-highest-confidence calls (even below the
+  // threshold) rather than leaving the screen sparse when today's news is quiet.
+  const strong = allCalls.filter((c) => c.strong);
+  if (strong.length >= MIN_CALLS) return strong;
+  return allCalls.slice(0, MIN_CALLS);
 }
 
 export default function OverviewView({ refreshSignal }) {
@@ -57,9 +64,10 @@ export default function OverviewView({ refreshSignal }) {
   return (
     <div className="news-feed">
       <div className="view-intro">
-        Today's most confident bullish/bearish calls, one per stock — based on the average
-        sentiment of everything published about it in the last 24h, not just one headline.
-        Higher % means the coverage has been more one-sided, not a guarantee. Not investment advice.
+        Today's bullish/bearish calls, one per stock — based on the average sentiment of
+        everything published about it in the last 24h, not just one headline. Shows at least
+        the top 10; calls marked "weak" fell below our confidence bar but are shown anyway
+        so the screen isn't empty on a quiet news day. Not investment advice.
       </div>
 
       {pendingCount > 0 && (
@@ -78,7 +86,7 @@ export default function OverviewView({ refreshSignal }) {
         calls.map((call) => (
           <a
             key={call.ticker}
-            className={`stock-row-card call-card call-card-${call.direction}`}
+            className={`stock-row-card call-card call-card-${call.direction} ${!call.strong ? "call-card-weak" : ""}`}
             href={call.latest.link}
             target="_blank"
             rel="noreferrer"
@@ -90,9 +98,11 @@ export default function OverviewView({ refreshSignal }) {
               </div>
               <span className={`sentiment-badge badge-${call.direction}`}>
                 {call.direction === "bullish" ? "▲" : "▼"} {call.confidence}%
+                {!call.strong && <span className="call-weak-tag"> · weak</span>}
               </span>
             </div>
             <p className="call-card-headline">{call.latest.title}</p>
+            <div className="news-datetime">{formatDateTime(call.latest.published)}</div>
             <div className="stock-row-footer">
               <span>{call.mentions} article{call.mentions > 1 ? "s" : ""} in the last 24h</span>
               <span>{timeAgo(call.latest.published)}</span>

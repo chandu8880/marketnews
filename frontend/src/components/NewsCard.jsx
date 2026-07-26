@@ -1,4 +1,4 @@
-import { timeAgo } from "../utils/time";
+import { formatDateTime, timeAgo } from "../utils/time";
 
 const SENTIMENT_META = {
   bullish: { label: "Bullish", cls: "badge-bullish", icon: "▲" },
@@ -19,6 +19,8 @@ export default function NewsCard({ article, isNew }) {
           {meta.icon} {meta.label}
         </span>
       </div>
+
+      <div className="news-datetime">{formatDateTime(article.published)}</div>
 
       <h2 className="news-title">
         <a href={article.link} target="_blank" rel="noreferrer">

@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import FilterTabs from "../components/FilterTabs";
 import NewsCard from "../components/NewsCard";
+import PriceRangeBar from "../components/PriceRangeBar";
 import SearchBar from "../components/SearchBar";
 import StockSentimentBar from "../components/StockSentimentBar";
-import { fetchNews } from "../api";
+import { fetchNews, fetchStockPrice } from "../api";
 import { useRefreshSignal } from "../hooks/useRefreshSignal";
 import { useSearch } from "../hooks/useSearch";
 import { useStockUniverse } from "../hooks/useStockUniverse";
@@ -39,6 +40,8 @@ function StockDetail({ stock, onBack }) {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [price, setPrice] = useState(null);
+  const [priceLoading, setPriceLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -52,6 +55,24 @@ function StockDetail({ stock, onBack }) {
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [stock.ticker]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setPriceLoading(true);
+    fetchStockPrice(stock.ticker)
+      .then((data) => {
+        if (!cancelled) setPrice(data);
+      })
+      .catch(() => {
+        // Fails quietly - price/52-week data is a bonus, not core to the screen.
+      })
+      .finally(() => {
+        if (!cancelled) setPriceLoading(false);
       });
     return () => {
       cancelled = true;
@@ -75,6 +96,20 @@ function StockDetail({ stock, onBack }) {
           {meta.icon} {meta.label}
         </span>
       </div>
+
+      {priceLoading && <div className="status-msg status-msg-compact">Loading price…</div>}
+      {!priceLoading && price?.price != null && (
+        <div className="price-block">
+          <div className="price-current">₹{price.price.toLocaleString("en-IN")}</div>
+          <PriceRangeBar
+            low={price.week52_low}
+            avg={price.week52_avg}
+            high={price.week52_high}
+            price={price.price}
+          />
+          <div className="price-range-caption">52-week range</div>
+        </div>
+      )}
 
       <StockSentimentBar
         bullish={stock.bullish_count}

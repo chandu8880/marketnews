@@ -191,3 +191,11 @@ class MarketIndex(BaseModel):
 class MarketIndicesResponse(BaseModel):
     indices: List[MarketIndex]
     server_time: datetime
+
+
+class StockPriceStats(BaseModel):
+    ticker: str
+    price: Optional[float]
+    week52_low: Optional[float]
+    week52_avg: Optional[float]
+    week52_high: Optional[float]

@@ -1318,3 +1318,100 @@
 .indices-down {
   border-top: 2px solid var(--bearish);
 }
+
+/* ---------- Stock detail: price + 52-week range (Kite-style) ---------- */
+.status-msg-compact {
+  padding: 8px 0;
+  text-align: left;
+  font-size: 12.5px;
+}
+
+.price-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.price-current {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.price-range {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.price-range-track {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--bearish), var(--neutral-bg) 50%, var(--bullish));
+  opacity: 0.85;
+}
+
+.price-range-price-marker,
+.price-range-avg-marker {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.price-range-price-marker {
+  background: var(--text);
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--border);
+  z-index: 2;
+}
+
+.price-range-avg-marker {
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--text-faint);
+  z-index: 1;
+}
+
+.price-range-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.price-range-label {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.price-range-label-right {
+  align-items: flex-end;
+}
+
+.price-range-label-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--text-faint);
+  text-transform: uppercase;
+}
+
+.price-range-label-value {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.price-range-caption {
+  font-size: 11px;
+  color: var(--text-faint);
+  text-align: center;
+}

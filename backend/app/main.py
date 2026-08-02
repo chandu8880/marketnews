@@ -24,11 +24,13 @@ from .models import (
     ResultsResponse,
     SessionCheckResponse,
     StocksResponse,
+    StockPriceStats,
     StockUniverseResponse,
     TranslateRequest,
     TranslateResponse,
 )
 from .results import analyze_result_company, attach_related_news
+from .stock_price import fetch_stock_price_stats
 from .scheduler import (
     DIVIDENDS_REFRESH_SECONDS,
     INDICES_REFRESH_SECONDS,
@@ -249,6 +251,17 @@ def get_stock_universe(force: bool = Query(False), _email: str = Depends(require
     _ensure_stock_universe_fresh(force)
     stocks, _ = stock_universe_cache.get()
     return StockUniverseResponse(stocks=stocks, server_time=now_utc())
+
+
+@app.get("/api/stocks/price", response_model=StockPriceStats)
+async def get_stock_price(
+    ticker: str = Query(..., min_length=1, description="Ticker, e.g. RELIANCE"),
+    _email: str = Depends(require_auth),
+):
+    stats = await run_in_threadpool(fetch_stock_price_stats, ticker.upper())
+    if stats is None:
+        raise HTTPException(status_code=502, detail="Could not fetch price data for this ticker")
+    return StockPriceStats(**stats)
 
 
 @app.get("/api/market/indices", response_model=MarketIndicesResponse)

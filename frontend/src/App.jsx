@@ -17,11 +17,13 @@ import IpoView from "./views/IpoView";
 import OverviewView from "./views/OverviewView";
 import ResultsView from "./views/ResultsView";
 import StocksView from "./views/StocksView";
+import TopAnalysisView from "./views/TopAnalysisView";
 
 const VIEW_TITLES = {
   overview: "Overview",
   news: "MarketPulse",
   stocks: "Stocks",
+  "top-analysis": "Top Analysis",
   results: "Results",
   dividends: "Dividends",
   ipo: "IPO Watch",
@@ -143,6 +145,7 @@ function App() {
         {view === "overview" && <OverviewView refreshSignal={refreshSignal} />}
         {view === "news" && <NewsView refreshSignal={refreshSignal} />}
         {view === "stocks" && <StocksView refreshSignal={refreshSignal} />}
+        {view === "top-analysis" && <TopAnalysisView refreshSignal={refreshSignal} />}
         {view === "results" && <ResultsView refreshSignal={refreshSignal} />}
         {view === "dividends" && <DividendsView refreshSignal={refreshSignal} />}
         {view === "ipo" && <IpoView refreshSignal={refreshSignal} />}

@@ -23,14 +23,17 @@ from .models import (
     ResultAnalysis,
     ResultsResponse,
     SessionCheckResponse,
+    StockAnalysisResponse,
     StocksResponse,
     StockPriceStats,
     StockUniverseResponse,
+    TopStocksListResponse,
     TranslateRequest,
     TranslateResponse,
 )
 from .results import analyze_result_company, attach_related_news
 from .stock_price import fetch_stock_price_stats
+from .top_analysis import analyze_stock, list_top_stocks
 from .scheduler import (
     DIVIDENDS_REFRESH_SECONDS,
     INDICES_REFRESH_SECONDS,
@@ -320,6 +323,28 @@ async def analyze_result(
 ):
     analysis = await run_in_threadpool(analyze_result_company, company)
     return ResultAnalysis(**analysis)
+
+
+@app.get("/api/top-analysis/stocks", response_model=TopStocksListResponse)
+def get_top_analysis_stocks(_email: str = Depends(require_auth)):
+    _ensure_news_fresh()
+    stocks = list_top_stocks(limit=100)
+    return TopStocksListResponse(stocks=stocks, server_time=now_utc())
+
+
+@app.get("/api/top-analysis/analyze", response_model=StockAnalysisResponse)
+async def get_top_analysis_detail(
+    ticker: str = Query(..., min_length=1, description="Ticker, e.g. RELIANCE"),
+    _email: str = Depends(require_auth),
+):
+    # Genuinely slow (shareholding scrape + indicator computation + news
+    # lookup + an LLM call, each a few seconds) - this is deliberately an
+    # on-demand per-stock action rather than something computed for all
+    # 100 stocks up front, which wouldn't fit in a request/serverless window.
+    result = await run_in_threadpool(analyze_stock, ticker)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Unknown ticker")
+    return StockAnalysisResponse(**result)
 
 
 @app.post("/api/translate", response_model=TranslateResponse)

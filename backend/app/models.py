@@ -199,3 +199,66 @@ class StockPriceStats(BaseModel):
     week52_low: Optional[float]
     week52_avg: Optional[float]
     week52_high: Optional[float]
+
+
+class TopStockListItem(BaseModel):
+    ticker: str
+    name: str
+    mentions: int
+    overall_sentiment: str
+    net_score: float
+
+
+class TopStocksListResponse(BaseModel):
+    stocks: List[TopStockListItem]
+    server_time: datetime
+
+
+class ShareholdingQuarter(BaseModel):
+    quarter: str
+    promoter: Optional[float]
+    fii: Optional[float]
+    dii: Optional[float]
+    public: Optional[float]
+    others: Optional[float]
+
+
+class ShareholdingData(BaseModel):
+    ticker: str
+    source_url: str
+    quarters: List[ShareholdingQuarter]
+
+
+class IndicatorData(BaseModel):
+    ticker: str
+    rsi: Optional[float]
+    rsi_signal: Optional[str]
+    stoch_rsi: Optional[float]
+    cci: Optional[float]
+    cci_signal: Optional[str]
+    mfi: Optional[float]
+    mfi_signal: Optional[str]
+    macd: Optional[float]
+    macd_signal_line: Optional[float]
+    macd_histogram: Optional[float]
+    macd_signal: Optional[str]
+    vwap: Optional[float]
+    plus_di: Optional[float]
+    minus_di: Optional[float]
+    di_signal: Optional[str]
+
+
+class VerdictData(BaseModel):
+    verdict: str
+    confidence: int
+    reasoning: str
+    model: str
+
+
+class StockAnalysisResponse(BaseModel):
+    ticker: str
+    name: str
+    indicators: Optional[IndicatorData]
+    shareholding: Optional[ShareholdingData]
+    news: List[StockArticleRef]
+    verdict: Optional[VerdictData]

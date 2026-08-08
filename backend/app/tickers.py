@@ -73,10 +73,77 @@ COMPANY_MAP = {
     "PIDILITIND": ("Pidilite Industries", ["Pidilite"]),
     "DMART": ("Avenue Supermarts (DMart)", ["DMart", "Avenue Supermarts"]),
     "SIEMENS": ("Siemens India", ["Siemens"]),
+    # --- Additional large-caps (rounds the tracked list out to ~100 for
+    # the Top Analysis screen; also improves general news ticker-tagging) ---
+    "LICI": ("Life Insurance Corporation of India", ["LIC India", "Life Insurance Corporation"]),
+    "TRENT": ("Trent Limited", ["Trent Ltd", "Trent Limited"]),
+    "BEL": ("Bharat Electronics", ["Bharat Electronics"]),
+    "VBL": ("Varun Beverages", ["Varun Beverages"]),
+    "HAL": ("Hindustan Aeronautics", ["Hindustan Aeronautics", "HAL"]),
+    "PFC": ("Power Finance Corporation", ["Power Finance Corporation"]),
+    "RECLTD": ("REC Limited", ["REC Limited", "REC Ltd"]),
+    "INDIGO": ("InterGlobe Aviation", ["InterGlobe Aviation", "IndiGo"]),
+    "TVSMOTOR": ("TVS Motor Company", ["TVS Motor"]),
+    "ABB": ("ABB India", ["ABB India"]),
+    "GODREJCP": ("Godrej Consumer Products", ["Godrej Consumer"]),
+    "DABUR": ("Dabur India", ["Dabur India", "Dabur"]),
+    "MARICO": ("Marico Limited", ["Marico"]),
+    "COLPAL": ("Colgate-Palmolive India", ["Colgate-Palmolive", "Colgate India"]),
+    "HAVELLS": ("Havells India", ["Havells"]),
+    "AMBUJACEM": ("Ambuja Cements", ["Ambuja Cements", "Ambuja Cement"]),
+    "SHREECEM": ("Shree Cement", ["Shree Cement"]),
+    "BOSCHLTD": ("Bosch Limited", ["Bosch Ltd", "Bosch Limited"]),
+    "MOTHERSON": ("Samvardhana Motherson International", ["Motherson"]),
+    "BANDHANBNK": ("Bandhan Bank", ["Bandhan Bank"]),
+    "FEDERALBNK": ("Federal Bank", ["Federal Bank"]),
+    "IDFCFIRSTB": ("IDFC First Bank", ["IDFC First Bank"]),
+    "AUBANK": ("AU Small Finance Bank", ["AU Small Finance Bank"]),
+    "POLYCAB": ("Polycab India", ["Polycab"]),
+    "TORNTPHARM": ("Torrent Pharmaceuticals", ["Torrent Pharma"]),
+    "LUPIN": ("Lupin Limited", ["Lupin"]),
+    "AUROPHARMA": ("Aurobindo Pharma", ["Aurobindo Pharma"]),
+    "BIOCON": ("Biocon Limited", ["Biocon"]),
+    "MPHASIS": ("Mphasis Limited", ["Mphasis"]),
+    "LTIM": ("LTIMindtree", ["LTIMindtree", "LTI Mindtree"]),
+    "PERSISTENT": ("Persistent Systems", ["Persistent Systems"]),
+    "COFORGE": ("Coforge Limited", ["Coforge"]),
+    "NAUKRI": ("Info Edge (Naukri)", ["Info Edge", "Naukri.com"]),
+    "SRF": ("SRF Limited", ["SRF Ltd", "SRF Limited"]),
+    "BERGEPAINT": ("Berger Paints India", ["Berger Paints"]),
+    "INDHOTEL": ("Indian Hotels Company", ["Indian Hotels", "Taj Hotels"]),
+    "JUBLFOOD": ("Jubilant FoodWorks", ["Jubilant FoodWorks", "Domino's India"]),
+    "MUTHOOTFIN": ("Muthoot Finance", ["Muthoot Finance"]),
+    "CHOLAFIN": ("Cholamandalam Investment", ["Cholamandalam Investment", "Chola Finance"]),
+    "ICICIGI": ("ICICI Lombard General Insurance", ["ICICI Lombard"]),
+    "ICICIPRULI": ("ICICI Prudential Life Insurance", ["ICICI Prudential Life"]),
+    "SBICARD": ("SBI Cards and Payment Services", ["SBI Cards"]),
+    "CGPOWER": ("CG Power and Industrial Solutions", ["CG Power"]),
+    "SUZLON": ("Suzlon Energy", ["Suzlon"]),
+    "IRFC": ("Indian Railway Finance Corporation", ["IRFC", "Indian Railway Finance"]),
+    "BHEL": ("Bharat Heavy Electricals", ["BHEL", "Bharat Heavy Electricals"]),
+    "SAIL": ("Steel Authority of India", ["SAIL", "Steel Authority of India"]),
+    "NMDC": ("NMDC Limited", ["NMDC"]),
+    "NHPC": ("NHPC Limited", ["NHPC"]),
+    "TATAPOWER": ("Tata Power Company", ["Tata Power"]),
+    "TATACONSUM": ("Tata Consumer Products", ["Tata Consumer"]),
+    "TATACOMM": ("Tata Communications", ["Tata Communications"]),
+    "UNITDSPR": ("United Spirits", ["United Spirits"]),
+    "PAGEIND": ("Page Industries", ["Page Industries"]),
+    "MRF": ("MRF Limited", ["MRF Ltd", "MRF Limited"]),
+    "ZYDUSLIFE": ("Zydus Lifesciences", ["Zydus Lifesciences", "Zydus Cadila"]),
+    "GLAND": ("Gland Pharma", ["Gland Pharma"]),
     "NIFTY": ("Nifty 50", ["Nifty 50", "Nifty50", "Nifty"]),
     "BANKNIFTY": ("Bank Nifty", ["Bank Nifty", "BankNifty"]),
     "SENSEX": ("BSE Sensex", ["Sensex"]),
 }
+
+# The above minus the 3 index entries - this is the "Top Analysis" screen's
+# tracked universe. Not a scientifically precise NIFTY-100-by-market-cap
+# ranking (that would need a reliable ticker->market-cap join we don't have
+# a clean free source for), but a curated set of large, liquid, frequently
+# covered NSE names that's reliably compatible with the Yahoo Finance and
+# moneycontrol symbol lookups the analysis screen depends on.
+TOP_ANALYSIS_TICKERS = [t for t in COMPANY_MAP if t not in ("NIFTY", "BANKNIFTY", "SENSEX")]
 
 _PATTERNS = None
 

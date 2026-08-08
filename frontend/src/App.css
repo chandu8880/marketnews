@@ -1415,3 +1415,172 @@
   color: var(--text-faint);
   text-align: center;
 }
+
+/* ---------- Top Analysis: verdict card, indicators, shareholding table ---------- */
+.verdict-card {
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid var(--border);
+}
+
+.verdict-bullish {
+  background: var(--bullish-bg);
+  border-color: var(--bullish);
+}
+
+.verdict-bearish {
+  background: var(--bearish-bg);
+  border-color: var(--bearish);
+}
+
+.verdict-neutral {
+  background: var(--neutral-bg);
+}
+
+.verdict-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.verdict-label {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
+.verdict-bullish .verdict-label {
+  color: var(--bullish);
+}
+
+.verdict-bearish .verdict-label {
+  color: var(--bearish);
+}
+
+.verdict-confidence {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.verdict-reasoning {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.verdict-model {
+  font-size: 10.5px;
+  color: var(--text-faint);
+}
+
+.analysis-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.analysis-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-faint);
+}
+
+.indicator-grid {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px 12px;
+}
+
+.indicator-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.indicator-row:last-child {
+  border-bottom: none;
+}
+
+.indicator-label {
+  color: var(--text-muted);
+}
+
+.indicator-value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+}
+
+.indicator-signal {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.indicator-signal-overbought,
+.indicator-signal-bearish {
+  background: var(--bearish-bg);
+  color: var(--bearish);
+}
+
+.indicator-signal-oversold,
+.indicator-signal-bullish {
+  background: var(--bullish-bg);
+  color: var(--bullish);
+}
+
+.indicator-signal-neutral {
+  background: var(--neutral-bg);
+  color: var(--neutral);
+}
+
+.shareholding-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.shareholding-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.shareholding-table th,
+.shareholding-table td {
+  padding: 9px 12px;
+  text-align: right;
+}
+
+.shareholding-table th:first-child,
+.shareholding-table td:first-child {
+  text-align: left;
+}
+
+.shareholding-table thead th {
+  background: var(--neutral-bg);
+  font-weight: 700;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.shareholding-table tbody tr:not(:last-child) td {
+  border-bottom: 1px solid var(--border);
+}

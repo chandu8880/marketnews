@@ -69,6 +69,15 @@ export function fetchStockPrice(ticker) {
   return apiFetch(`/api/stocks/price?${params.toString()}`);
 }
 
+export function fetchTopAnalysisStocks() {
+  return apiFetch("/api/top-analysis/stocks");
+}
+
+export function fetchTopAnalysisDetail(ticker) {
+  const params = new URLSearchParams({ ticker });
+  return apiFetch(`/api/top-analysis/analyze?${params.toString()}`);
+}
+
 export function fetchDividends(days = 4, force = false) {
   const params = new URLSearchParams({ days: String(days) });
   if (force) params.set("force", "true");

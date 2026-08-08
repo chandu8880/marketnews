@@ -1584,3 +1584,40 @@
 .shareholding-table tbody tr:not(:last-child) td {
   border-bottom: 1px solid var(--border);
 }
+
+.screener-table-wrap {
+  margin-bottom: 12px;
+}
+
+.screener-table {
+  font-size: 12px;
+}
+
+.screener-th {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.screener-th:hover {
+  color: var(--text);
+}
+
+.screener-sort-arrow {
+  color: var(--accent, #2f6fed);
+  font-size: 9px;
+}
+
+.screener-stock-cell {
+  text-align: left;
+}
+
+.screener-ticker {
+  font-weight: 700;
+}
+
+.screener-name {
+  font-size: 10.5px;
+  color: var(--text-faint);
+  font-weight: 400;
+}

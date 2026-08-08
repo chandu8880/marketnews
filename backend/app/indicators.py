@@ -183,8 +183,13 @@ def compute_vwap(highs, lows, closes, volumes):
     return sum(t * v for t, v in zip(tp, volumes)) / total_vol
 
 
-def compute_di(highs, lows, closes, period=14):
-    if len(closes) < period + 1:
+def compute_di_adx(highs, lows, closes, period=14):
+    """+DI/-DI (trend direction) plus ADX (trend strength) - the standard
+    DMI trio; ADX is always shown alongside DI in every charting platform
+    (TradingView, Kite, etc.) since DI alone tells you direction but not
+    whether that direction is actually a strong trend or just noise.
+    """
+    if len(closes) < period * 2:
         return None
     plus_dm, minus_dm, tr = [], [], []
     for i in range(1, len(closes)):
@@ -204,9 +209,27 @@ def compute_di(highs, lows, closes, period=14):
     if not smoothed_tr or smoothed_tr[-1] == 0:
         return None
 
+    # DX at every smoothed point (not just the latest) - ADX is Wilder's
+    # smoothing applied to this whole DX series, not to a single value.
+    dx_series = []
+    for pdm, mdm, t in zip(smoothed_plus, smoothed_minus, smoothed_tr):
+        if t == 0:
+            dx_series.append(0.0)
+            continue
+        pdi_i = 100 * pdm / t
+        mdi_i = 100 * mdm / t
+        denom = pdi_i + mdi_i
+        dx_series.append(100 * abs(pdi_i - mdi_i) / denom if denom != 0 else 0.0)
+
+    adx = None
+    if len(dx_series) >= period:
+        adx = sum(dx_series[:period]) / period
+        for dx in dx_series[period:]:
+            adx = (adx * (period - 1) + dx) / period
+
     plus_di = 100 * smoothed_plus[-1] / smoothed_tr[-1]
     minus_di = 100 * smoothed_minus[-1] / smoothed_tr[-1]
-    return {"plus_di": plus_di, "minus_di": minus_di}
+    return {"plus_di": plus_di, "minus_di": minus_di, "adx": adx}
 
 
 def _interpret_rsi(v):
@@ -239,6 +262,18 @@ def _interpret_mfi(v):
     return "neutral"
 
 
+def _interpret_adx(v):
+    # Standard convention: ADX measures trend *strength*, not direction
+    # (pair with +DI/-DI for direction) - below 20 means no real trend.
+    if v is None:
+        return None
+    if v >= 25:
+        return "strong-trend"
+    if v < 20:
+        return "weak-trend"
+    return "neutral"
+
+
 def compute_all_indicators(ticker: str):
     data = fetch_ohlcv(ticker)
     if data is None:
@@ -253,7 +288,7 @@ def compute_all_indicators(ticker: str):
     mfi = compute_mfi(highs, lows, closes, volumes)
     macd = compute_macd(closes)
     vwap = compute_vwap(highs, lows, closes, volumes)
-    di = compute_di(highs, lows, closes)
+    di = compute_di_adx(highs, lows, closes)
 
     return {
         "ticker": ticker,
@@ -272,4 +307,6 @@ def compute_all_indicators(ticker: str):
         "plus_di": round(di["plus_di"], 2) if di else None,
         "minus_di": round(di["minus_di"], 2) if di else None,
         "di_signal": (("bullish" if di["plus_di"] > di["minus_di"] else "bearish") if di else None),
+        "adx": round(di["adx"], 2) if di and di.get("adx") is not None else None,
+        "adx_signal": _interpret_adx(di["adx"]) if di and di.get("adx") is not None else None,
     }

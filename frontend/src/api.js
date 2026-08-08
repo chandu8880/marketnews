@@ -78,6 +78,12 @@ export function fetchTopAnalysisDetail(ticker) {
   return apiFetch(`/api/top-analysis/analyze?${params.toString()}`);
 }
 
+export function fetchScreener(force = false) {
+  const params = new URLSearchParams();
+  if (force) params.set("force", "true");
+  return apiFetch(`/api/screener?${params.toString()}`);
+}
+
 export function fetchDividends(days = 4, force = false) {
   const params = new URLSearchParams({ days: String(days) });
   if (force) params.set("force", "true");

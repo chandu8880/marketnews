@@ -22,7 +22,7 @@ COMPANY_MAP = {
     "AXISBANK": ("Axis Bank", ["Axis Bank"]),
     "ASIANPAINT": ("Asian Paints", ["Asian Paints"]),
     "MARUTI": ("Maruti Suzuki", ["Maruti Suzuki", "Maruti"]),
-    "TATAMOTORS": ("Tata Motors", ["Tata Motors"]),
+    "TMCV": ("Tata Motors", ["Tata Motors"]),  # post-2025 demerger symbol (commercial vehicles arm kept the name)
     "TATASTEEL": ("Tata Steel", ["Tata Steel"]),
     "SUNPHARMA": ("Sun Pharmaceutical", ["Sun Pharma", "Sun Pharmaceutical"]),
     "NTPC": ("NTPC Limited", ["NTPC"]),
@@ -60,7 +60,7 @@ COMPANY_MAP = {
     "ADANIPOWER": ("Adani Power", ["Adani Power"]),
     "VEDL": ("Vedanta Limited", ["Vedanta"]),
     "DLF": ("DLF Limited", ["DLF"]),
-    "ZOMATO": ("Eternal (Zomato)", ["Zomato", "Eternal Ltd"]),
+    "ETERNAL": ("Eternal (Zomato)", ["Zomato", "Eternal Ltd"]),  # renamed from Zomato/ZOMATO in 2024
     "PAYTM": ("One97 Communications (Paytm)", ["Paytm"]),
     "NYKAA": ("FSN E-Commerce (Nykaa)", ["Nykaa"]),
     "IRCTC": ("IRCTC", ["IRCTC"]),

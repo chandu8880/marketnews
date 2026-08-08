@@ -262,3 +262,23 @@ class StockAnalysisResponse(BaseModel):
     shareholding: Optional[ShareholdingData]
     news: List[StockArticleRef]
     verdict: Optional[VerdictData]
+
+
+class ScreenerRow(BaseModel):
+    ticker: str
+    name: str
+    rsi: Optional[float]
+    stoch_rsi: Optional[float]
+    cci: Optional[float]
+    macd: Optional[float]
+    macd_signal_line: Optional[float]
+    macd_histogram: Optional[float]
+    vwap: Optional[float]
+    plus_di: Optional[float]
+    minus_di: Optional[float]
+    adx: Optional[float]
+
+
+class ScreenerResponse(BaseModel):
+    rows: List[ScreenerRow]
+    server_time: datetime

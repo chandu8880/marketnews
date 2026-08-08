@@ -3,6 +3,7 @@ const MENU_ITEMS = [
   { key: "news", label: "News", icon: "📰" },
   { key: "stocks", label: "Stocks", icon: "📊" },
   { key: "top-analysis", label: "Top Analysis", icon: "🧪" },
+  { key: "screener", label: "Screener", icon: "📋" },
   { key: "results", label: "Results", icon: "📄" },
   { key: "dividends", label: "Dividends", icon: "💰" },
   { key: "ipo", label: "IPO", icon: "🏦" },

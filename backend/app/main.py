@@ -9,7 +9,14 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .auth import logout as auth_logout
 from .auth import request_otp, validate_session, verify_otp
-from .cache import dividends_cache, indices_cache, ipo_cache, results_cache, stock_universe_cache
+from .cache import (
+    dividends_cache,
+    indices_cache,
+    ipo_cache,
+    results_cache,
+    screener_cache,
+    stock_universe_cache,
+)
 from .models import (
     DividendsResponse,
     IpoResponse,
@@ -22,6 +29,7 @@ from .models import (
     OtpVerifyResponse,
     ResultAnalysis,
     ResultsResponse,
+    ScreenerResponse,
     SessionCheckResponse,
     StockAnalysisResponse,
     StocksResponse,
@@ -40,12 +48,14 @@ from .scheduler import (
     IPO_REFRESH_SECONDS,
     NEWS_REFRESH_SECONDS,
     RESULTS_REFRESH_SECONDS,
+    SCREENER_REFRESH_SECONDS,
     STOCK_UNIVERSE_REFRESH_SECONDS,
     refresh_dividends,
     refresh_indices,
     refresh_ipo,
     refresh_news,
     refresh_results,
+    refresh_screener,
     refresh_stock_universe,
     start_scheduler,
     stop_scheduler,
@@ -145,6 +155,11 @@ def _ensure_stock_universe_fresh(force: bool = False):
 def _ensure_indices_fresh(force: bool = False):
     if force or indices_cache.is_stale(INDICES_REFRESH_SECONDS + 30):
         refresh_indices()
+
+
+def _ensure_screener_fresh(force: bool = False):
+    if force or screener_cache.is_stale(SCREENER_REFRESH_SECONDS + 60):
+        refresh_screener()
 
 
 def require_auth(request: Request) -> str:
@@ -272,6 +287,13 @@ def get_market_indices(force: bool = Query(False), _email: str = Depends(require
     _ensure_indices_fresh(force)
     indices, _ = indices_cache.get()
     return MarketIndicesResponse(indices=indices, server_time=now_utc())
+
+
+@app.get("/api/screener", response_model=ScreenerResponse)
+def get_screener(force: bool = Query(False), _email: str = Depends(require_auth)):
+    _ensure_screener_fresh(force)
+    rows, _ = screener_cache.get()
+    return ScreenerResponse(rows=rows, server_time=now_utc())
 
 
 @app.get("/api/dividends/upcoming", response_model=DividendsResponse)
